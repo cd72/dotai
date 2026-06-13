@@ -68,13 +68,16 @@ Each card tests **one specific piece of information**. If a concept has multiple
 - **Write unambiguous prompts.** A good prompt has exactly one correct answer. If the question could reasonably have several answers, narrow it: "What was the **immediate** cause of WWI?" rather than "What caused WWI?"
 - **Avoid yes/no questions.** They give a 50% chance of being right by guessing and don't test real understanding. Reframe: instead of "Is the mitochondrion the powerhouse of the cell?" ask "Which organelle is known as the powerhouse of the cell?"
 - **Add enough context that the card makes sense in isolation.** When the user reviews this card in 6 months, they won't remember it came from chapter 3 of a specific book. "What does the second argument do?" is unreviewable; "In Python's `range()` function, what does the second argument specify?" is fine.
+- **Watch for interference between near-identical cards.** Interference - similar cards making each other hard to recall - is one of the biggest causes of forgetting. When several cards share almost the same front (e.g. "Which layer sits above X?" repeated for every layer, or many drug-dosage numbers), they blur together. Defend against it: make each front unambiguous, add a distinguishing cue or example that pins down the specific one, and prefer a few well-differentiated cards over a dozen interchangeable ones. If two cards could be answered by swapping their answers without anyone noticing, they will interfere.
+- **Date- or version-stamp volatile facts.** Stable facts (anatomy, basic maths, history) need no stamp. But anything that goes out of date - statistics, prices, economic figures, "current" office-holders, software behaviour - should carry a marker so the user knows when it was true: put a year or version in the card (e.g. "As of <b>2026</b>, …" or "In <b>Python 3.12</b>, …") and add a tag like `as_of_2026`. This makes stale cards easy to find and update later, and stops the user trusting a figure that has since moved.
 
 ### Answer / back-of-card style
 
-- The back contains: the **answer**, then a brief **explanation**, and where possible a **direct quote from the source** to anchor the card to the original material.
-- Keep explanations short - one or two sentences. The card is for recall, not re-reading the textbook.
+- **The core answer must be as short as possible and stand alone.** What the learner has to *retrieve* is the first thing on the back, on its own line, in the fewest words that are correct - ideally a single word or phrase. Everything else (explanation, example, source quote) is secondary context to be read *after* recall, not part of what's being recalled. This is the minimum information principle applied to the back: the shorter the thing you pull from memory each repetition, the more reliably it sticks.
+- After the answer, you may add a brief **explanation** and, where possible, a **direct quote from the source** to anchor the card. Keep the explanation to one or two sentences - the card is for recall, not re-reading the textbook.
 - Include short examples on the back when they aid understanding (e.g., for an abstract concept like "lazy evaluation", give a one-line example).
-- Use new lines <br> and/or a blank line to separate the answer from the explanation.
+- **For arbitrary, hard-to-associate facts, consider adding a short mnemonic.** When a fact has no logical hook - a name, a date, an order with no inherent reason - a small memory aid on the back (a wordplay link, an acronym, a vivid image described in words) can turn a future leech into a stable card. Keep it brief and clearly secondary to the answer, e.g. answer first, then `<br><i>(mnemonic: …)</i>`. Don't force mnemonics onto facts that already have a logical structure; reserve them for the genuinely arbitrary ones.
+- Use new lines <br> and/or a blank line to separate the answer from the explanation, so the eye lands on the answer first.
 - **Never deliver a back as a single dense paragraph when it contains more than one distinct point.** Even within an atomic card, put the answer on its own line, then the explanation, then any quote - each separated by `<br>`. A wall of text with no line breaks is hard to scan during review and is treated as a defect to fix before output.
 
 
@@ -99,12 +102,15 @@ For these, use Anki's **`Basic (and reversed card)`** note type instead of `Basi
 When the source is clearly a vocabulary list, a glossary, or term/definition pairs, default to offering reversed cards (or just produce them and say so in the preview). Do **not** make cards reversible by default for ordinary factual Q&A - "Which organelle is the powerhouse of the cell?" reversed becomes "🧬 mitochondrion → ?", which has many valid answers and trains nothing. Reverse only when *both* directions have a single, well-defined answer.
 
 
-### What to skip
+### What to skip (and what not to skip)
 
 - Trivial details (page numbers, author's middle name, exact dates of minor events).
 - Examples that exist purely to illustrate a concept already covered by another card.
 - Anything the user is unlikely to ever need to recall.
-- Restated definitions where the same idea has already been captured by a different card.
+
+**But do not over-prune the basics.** A fact being *obvious* or *simple* is not a reason to skip it - foundational facts are cheap to memorise, are leaned on constantly, and a lapse on one is costly. Skip genuine *trivia* (incidental, low-value detail), not load-bearing basics. When in doubt about a basic, keep it.
+
+**Deliberate redundancy is good - don't confuse it with lazy duplication.** Two cards that say the same thing the same way are waste; cut the weaker one. But planned redundancy on a *high-value* fact is beneficial and does not violate the minimum information principle: a reversed card (active *and* passive recall of the same pair), or two cards probing the same important idea from different angles, each strengthen recall and resist interference. So keep purposeful redundancy on the facts that matter; only cut redundancy that adds nothing.
 
 ### Formatting (this is strict)
 
@@ -153,6 +159,25 @@ The three primary colours are:
 ```
 
 Note on the TSV file: each note must still occupy exactly one line, so write the list markup with no literal newlines inside the field (the `<li>`/`<ul>` tags handle the visual line breaks themselves). The HTML renders correctly regardless of internal whitespace.
+
+### Overlapping cloze for long ordered sequences
+
+The single-note list above (one card hiding every item at once) is fine for short sets, but for a *long ordered sequence* where the user must reproduce the order - and especially where the transitions between items are the hard part - it trains the ordering poorly: the learner sees every other item as a stable anchor and never has to recall what follows what. The SuperMemo remedy is **overlapping cloze**: a sliding window of notes that each hide one item while *showing its neighbours*, so the brain rehearses the transitions. Think of how you'd drill the alphabet - not "recite all 26", but "…C, **?**, E…".
+
+The key mechanic is cloze numbering: **items sharing the same `cN` number are hidden together on one card; different numbers make separate cards.** For a sliding window you want one card per note, so use a single `c1` per note and slide it along the sequence, keeping one or two neighbours visible on each side as context:
+
+```
+note 1:  Order of operations: Parentheses, {{c1::Exponents}}, Multiplication
+note 2:  Order of operations: Exponents, {{c1::Multiplication}}, Division
+note 3:  Order of operations: Multiplication, {{c1::Division}}, Addition
+note 4:  Order of operations: Division, {{c1::Addition}}, Subtraction
+```
+
+Each note is one row in the cloze TSV and yields exactly one card. Consecutive windows overlap (Multiplication is shown on notes 1 and 3 and hidden on note 2), which is the *planned redundancy* of rule 17 - the overlap is what builds the chain, not bloat. Use this when a sequence has roughly 6+ ordered items and the order itself is the point (the alphabet, the cranial nerves, a decay chain, a ranked list). For short sequences (3-5 items) the single stacked-list note is simpler and still fine. If you want a wider gap, hide a short *run* with one shared number - `…A {{c1::B}} {{c1::C}} {{c1::D}} E…` makes one card that hides B, C and D together - but the one-item sliding window is the easiest to get right. It can also help to keep one whole-sequence card, or to have the user recite the full list once after the individual repetitions.
+
+### Converting a set into a meaningful structure (rather than a flat cloze)
+
+Before you make *any* cloze list for a set, ask whether the set can be **regrouped into something meaningful** - this is almost always better than memorising a bare membership list. Wozniak's worked example takes the 15 members of the EU and, instead of one impossible "list all members" card, builds a series of small context-anchored cards around the *history* of who joined when (founding six, then the 1973 entrants, then 1981, and so on). The flat set becomes a structured, partly-causal story that's far easier to retain and teaches more. So for a set, prefer: group by a meaningful dimension (chronology, geography, function), give each group its own small card with context, and only fall back to a stacked cloze list when no meaningful structure exists and the bare membership genuinely must be memorised.
 
 ## Output format
 
@@ -204,7 +229,7 @@ The built-in Cloze note type has two content fields, **Text** and **Back Extra**
 
 ### Tags
 
-Derive tags from the source material's structure and topics. Use `lowercase_with_underscores`, separate multiple tags with spaces. Examples: `biology cell_structure organelles`, `python functions error_handling`, `ww1 causes alliances`. Tags help the user filter and organise within Anki - give every card 2–4 relevant tags.
+Derive tags from the source material's structure and topics, and prefer **hierarchical tags** using `::` to nest subtopics under a parent - this is the modern Anki convention and filters far better than a flat list, because the user can collapse a whole branch or select a parent to catch everything beneath it. Use `lowercase_with_underscores` for each level. Examples: `biology::cell_structure::organelles`, `python::functions::error_handling`, `history::ww1::causes`. Give every card 2-4 relevant tags. A good default is one or two hierarchy tags that place the card in the deck's topic tree, plus a flat keyword tag or two for cross-cutting themes (e.g. `exam_critical`, `as_of_2026`). Keep the hierarchy shallow - two or three levels is plenty; deeper nesting is rarely worth the verbosity.
 
 ### Critical TSV escaping rules
 
@@ -250,11 +275,11 @@ This keeps quote characters (`"`, `'`) intact in the output, which matters becau
 Before (or alongside) saving the TSV files, show the user a clean preview of the cards in chat so they can sanity-check. Use this format:
 
 ```
-**Card 1** · tags: `biology cell_structure`
+**Card 1** · tags: `biology::cell_structure::organelles`
 Front: 🧬 Which organelle is known as the **powerhouse of the cell**?
 Back: ⚡ The **mitochondrion**. It generates most of the cell's ATP through aerobic respiration.
 
-**Card 2** · tags: `biology photosynthesis`
+**Card 2** · tags: `biology::photosynthesis`
 Front: 🌱 Where in the plant cell does **photosynthesis** occur?
 Back: 🔬 In the **chloroplasts**, specifically within the thylakoid membranes.
 ```
@@ -269,10 +294,11 @@ Choose a descriptive deck name from the source topic *before* generating the fil
 
 - **Source is in another language.** Generate the cards in the same language as the source unless the user asks otherwise. Adjust emoji choices and HTML escaping the same way.
 - **Source contains formulas / code.** Wrap formulas in `<code>…</code>` for inline rendering, or for multi-line code use `<pre>…</pre>`. For LaTeX, Anki uses `\(…\)` for inline and `\[…\]` for display math - the user will need MathJax enabled. Remember that literal `<`, `>` and `&` inside code or inequalities must be escaped to `&lt;`, `&gt;`, `&amp;` (see the formatting rules) or they'll vanish under HTML rendering.
-- **Source has images/diagrams worth learning (anatomy, maps, charts).** TSV import cannot bundle media - Anki only finds images that already sit in the profile's `collection.media` folder, which this skill can't write to. So don't emit `<img>` tags pointing at files the user doesn't have; they'll just show as broken images. Instead, describe the visual in words on the card, and tell the user that image-based cards (including image occlusion for diagrams) need to be added manually inside Anki. Flag this whenever the source is genuinely visual and the text-only cards lose something important.
+- **Source has images/diagrams worth learning (anatomy, maps, charts).** Imagery is one of the most powerful learning aids - a labelled diagram can be far more memorable than the equivalent prose, and a single illustration can seed many cards by hiding one labelled part at a time (graphic deletion). But TSV import cannot bundle media: Anki only finds images already in the profile's `collection.media` folder, which this skill can't write to. So don't emit `<img>` tags pointing at files the user doesn't have - they'll show as broken images. Instead: (a) describe the visual in words on the text cards so the deck still works, and (b) when the source is genuinely visual, tell the user that the strongest cards here would be image-based, and point them at Anki's built-in **Image Occlusion** note type (Anki 23.10+), which is purpose-built for hiding labelled regions of a diagram - they add the image once inside Anki and it generates one card per hidden region. Flag this whenever text-only cards clearly lose something important.
 - **Source is too thin to make a meaningful deck.** If the source is under ~200 words or just a list of trivia, tell the user honestly and ask whether they have more material to combine or whether they want cards on the small amount that's there.
 - **User asks for a specific number of cards.** Honour it - but if the number is way out of step with the source (e.g., 5 cards for an entire textbook chapter, or 100 cards for a one-page summary), say so and suggest a more sensible count.
 - **User wants only cloze, or only Q&A.** Honour the preference. Cloze-only decks are common for vocabulary or list-heavy material.
+- **Exact spelling matters (vocabulary, terminology, formulae written out).** Anki can require the user to *type* the answer and will highlight any mistake, which is valuable when knowing roughly the right answer isn't enough. To use it, the front field includes a `{{type:Back}}` marker referencing the answer field (e.g. a `Basic` card whose front ends with `<br>{{type:Back}}`). Mention this option when spelling or exact form is the point - but don't apply it by default, since for most conceptual cards "recall the gist" is the goal and forced typing just adds friction.
 
 ## Worked example
 

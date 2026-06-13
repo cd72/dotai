@@ -23,32 +23,32 @@ Back: A metabolic cycle in the mitochondrial matrix that produces NADH, FADH2, G
 Card 1
 Front: 🧬 Where in the cell does the <b>Krebs cycle</b> take place?
 Back: 🔬 In the <b>mitochondrial matrix</b>.<br><br><i>"The Krebs cycle… takes place in the mitochondrial matrix."</i>
-Tags: biology metabolism krebs_cycle
+Tags: biology::metabolism::krebs_cycle
 
 Card 2
 Front: ⚙️ What are the two alternative names for the <b>Krebs cycle</b>?
 Back: 📚 The <b>citric acid cycle</b> and the <b>tricarboxylic acid (TCA) cycle</b>.
-Tags: biology metabolism krebs_cycle
+Tags: biology::metabolism::krebs_cycle
 
 Card 3
 Front: ⚡ How many <b>NADH</b> molecules does one turn of the Krebs cycle produce?
 Back: 🔢 <b>3 NADH</b> per acetyl-CoA molecule entering the cycle.
-Tags: biology metabolism krebs_cycle energy
+Tags: biology::metabolism::krebs_cycle energy
 
 Card 4
 Front: 🔥 How many <b>FADH₂</b> molecules does one turn of the Krebs cycle produce?
 Back: 🔢 <b>1 FADH₂</b> per acetyl-CoA.
-Tags: biology metabolism krebs_cycle energy
+Tags: biology::metabolism::krebs_cycle energy
 
 Card 5
 Front: 💨 How many <b>CO₂</b> molecules are released per turn of the Krebs cycle?
 Back: 🌫️ <b>2 CO₂</b> molecules per acetyl-CoA.
-Tags: biology metabolism krebs_cycle
+Tags: biology::metabolism::krebs_cycle
 
 Card 6 (cloze - list of products is a good cloze fit; items stacked as a list, not inline)
 Text: 🧪 Per acetyl-CoA, the Krebs cycle produces:<ul><li>{{c1::3}} NADH</li><li>{{c2::1}} FADH₂</li><li>{{c3::1}} GTP</li><li>{{c4::2}} CO₂</li></ul>
 Back Extra: 🔬 Yields per single turn of the cycle.<br><i>"…it produces 3 NADH, 1 FADH2, 1 GTP… and 2 CO2."</i>
-Tags: biology metabolism krebs_cycle
+Tags: biology::metabolism::krebs_cycle
 ```
 
 Note: the "discovered by Hans Krebs in 1937" detail is borderline trivia for someone studying metabolism - skip it unless the user is studying history of science.
@@ -67,22 +67,22 @@ Note: the "discovered by Hans Krebs in 1937" detail is borderline trivia for som
 Card 1
 Front: 🐍 What does Python's <b>enumerate()</b> function return?
 Back: 📦 An <b>enumerate object</b> - an iterator that yields <code>(index, value)</code> tuples.
-Tags: python builtins iteration
+Tags: python::builtins::iteration
 
 Card 2
 Front: 🔢 What is the default <b>start</b> value for Python's <code>enumerate()</code>?
 Back: 0️⃣ <b>0</b> - pass <code>start=N</code> to begin counting from <i>N</i> instead.
-Tags: python builtins iteration
+Tags: python::builtins::iteration
 
 Card 3
 Front: 🐍 Write the call signature for Python's <code>enumerate()</code>.
 Back: ⌨️ <code>enumerate(iterable, start=0)</code>
-Tags: python builtins iteration syntax
+Tags: python::builtins::iteration syntax
 
 Card 4
 Front: 🔁 Given <code>enumerate(['a','b','c'], start=1)</code>, what tuples does it yield?
 Back: 📦 <code>(1, 'a')</code>, <code>(2, 'b')</code>, <code>(3, 'c')</code>.
-Tags: python builtins iteration examples
+Tags: python::builtins::iteration examples
 ```
 
 Note the angle-bracket trap for typed/generic code. A card about a C++ or Java generic must escape the literal `<` and `>`, or Anki (with `#html:true`) will treat them as tags and they'll disappear:
@@ -91,7 +91,7 @@ Note the angle-bracket trap for typed/generic code. A card about a C++ or Java g
 Card 5
 Front: 🧩 In C++, how do you declare a vector of integers?
 Back: ⌨️ <code>std::vector&lt;int&gt; v;</code>   ← written as &amp;lt; / &amp;gt; so it renders as std::vector<int>
-Tags: cpp stl containers
+Tags: cpp::stl::containers
 ```
 
 The `&lt;`/`&gt;` in the source line above render on the card as the literal `<` and `>`. If you wrote a bare `<int>`, the card back would show `std::vector v;` with the type silently gone.
@@ -112,7 +112,7 @@ This is a perfect cloze candidate - the four-part list maps cleanly to four cloz
 Card 1 (cloze, single note → 4 cards; unordered set, so <ul>)
 Text: ⚖️ <b>Negligence</b> requires four elements:<ul><li>{{c1::duty of care}}</li><li>{{c2::breach of duty}}</li><li>{{c3::causation}}</li><li>{{c4::remoteness of damage}}</li></ul>
 Back Extra: 📚 All four must be proved for liability to arise.<br><i>"Negligence is established when four elements are proved…"</i>
-Tags: law tort negligence
+Tags: law::tort::negligence
 ```
 
 But also add Q&A cards for the conceptual understanding of each element:
@@ -121,12 +121,12 @@ But also add Q&A cards for the conceptual understanding of each element:
 Card 2
 Front: ⚖️ What does the <b>"causation"</b> element of negligence require?
 Back: 🔗 That the defendant's breach <i>caused</i> the claimant's loss - typically tested with the "but for" test.
-Tags: law tort negligence causation
+Tags: law::tort::negligence causation
 
 Card 3
 Front: ⚖️ What does the <b>"remoteness"</b> element of negligence require?
 Back: 📏 That the loss was a reasonably foreseeable consequence of the breach - losses too far removed are not recoverable.
-Tags: law tort negligence remoteness
+Tags: law::tort::negligence remoteness
 ```
 
 This pairs the structural memory (the four-element list, via cloze) with the conceptual memory (what each element actually means, via Q&A). Both are needed and they don't duplicate each other.
@@ -142,20 +142,20 @@ This pairs the structural memory (the four-element list, via cloze) with the con
 ```
 Card 1 (cloze for the sequence; order matters, so <ol>)
 Text: 🌐 The seven layers of the <b>OSI model</b>, bottom to top, are:<ol><li>{{c1::Physical}}</li><li>{{c2::Data Link}}</li><li>{{c3::Network}}</li><li>{{c4::Transport}}</li><li>{{c5::Session}}</li><li>{{c6::Presentation}}</li><li>{{c7::Application}}</li></ol>
-Tags: networking osi_model
+Tags: networking::osi_model
 
 Card 2 (Q&A for the position of each - separate card per layer)
 Front: 🌐 Which OSI layer sits <b>directly above</b> the Network layer?
 Back: 🚚 The <b>Transport layer</b> (layer 4).
-Tags: networking osi_model
+Tags: networking::osi_model
 
 Card 3
 Front: 🌐 Which is the <b>top</b> layer of the OSI model?
 Back: 🖥️ The <b>Application layer</b> (layer 7).
-Tags: networking osi_model
+Tags: networking::osi_model
 ```
 
-For a 7-item sequence, don't make 7 separate "what comes after X" cards - that's overkill and the cloze captures the order. Just add a few cards for the most-tested positions or distinguishing features.
+For a 7-item sequence, don't make 7 separate "what comes after X" cards - that's overkill. The single stacked cloze captures the order adequately for a list this size; add a few Q&A cards for the most-tested positions or distinguishing features. If the order were genuinely hard and exam-critical, you'd switch to overlapping cloze (see Example 6) instead of the single stacked deletion.
 
 ---
 
@@ -172,18 +172,79 @@ Vocabulary is the textbook case for the **`Basic (and reversed card)`** note typ
 
 Front: 🇪🇸 <b>aprender</b>
 Back: 🇬🇧 to learn
-Tags: spanish vocab verbs
+Tags: spanish::vocab::verbs
 
 Front: 🇪🇸 <b>el libro</b>
 Back: 🇬🇧 the book
-Tags: spanish vocab nouns
+Tags: spanish::vocab::nouns
 
 Front: 🇪🇸 <b>rápido</b>
 Back: 🇬🇧 quick, fast
-Tags: spanish vocab adjectives
+Tags: spanish::vocab::adjectives
 ```
 
 Keep these cards genuinely atomic and symmetric. If a word has several distinct senses that aren't simple synonyms, split them into separate notes rather than cramming them onto one back - a reversed card with three unrelated meanings on the back becomes ambiguous in the English→Spanish direction. (Here "quick, fast" are close synonyms, so one card is fine.) Don't reverse cards whose back isn't a clean, single answer - reserve `Basic (and reversed card)` for true pairs.
+
+---
+
+## Example 6: A long ordered sequence (overlapping cloze)
+
+**Source excerpt** (chemistry):
+
+> "The first six elements of the periodic table, in order, are: Hydrogen, Helium, Lithium, Beryllium, Boron, Carbon."
+
+A single stacked cloze that hides all six at once lets the learner lean on the visible items and never drills the transitions. For a sequence this long where the *order* is the point, use **overlapping cloze** - a sliding window where each note hides one item and shows its neighbours. One `c1` per note means one card per note; consecutive windows overlap. Each line below is one note (one row in the cloze TSV):
+
+```
+(file: periodic_table_cloze.tsv, #notetype:Cloze)
+
+Text: 🧪 Sequence: Hydrogen, {{c1::Helium}}, Lithium
+Back Extra: ⚛️ Element 2.
+Tags: chemistry::periodic_table::order
+
+Text: 🧪 Sequence: Helium, {{c1::Lithium}}, Beryllium
+Back Extra: ⚛️ Element 3.
+Tags: chemistry::periodic_table::order
+
+Text: 🧪 Sequence: Lithium, {{c1::Beryllium}}, Boron
+Back Extra: ⚛️ Element 4.
+Tags: chemistry::periodic_table::order
+
+Text: 🧪 Sequence: Beryllium, {{c1::Boron}}, Carbon
+Back Extra: ⚛️ Element 5.
+Tags: chemistry::periodic_table::order
+```
+
+The windows overlap (Lithium is shown on the Helium and Beryllium cards and hidden on its own), so the brain rehearses every transition. For a *short* sequence (3-5 items) this is overkill - one stacked-list cloze is fine. Reserve overlapping cloze for the genuinely long, order-critical ones. If a wider gap suits the material, hide a run of items under one shared number (`Hydrogen {{c1::Helium}} {{c1::Lithium}} {{c1::Beryllium}} Boron` makes one card hiding three together).
+
+---
+
+## Example 7: Converting a set into a meaningful structure
+
+**Source excerpt** (history):
+
+> "The six founding members of the European Economic Community (1957) were: Belgium, France, Italy, Luxembourg, the Netherlands, and West Germany."
+
+A bare "name all six founders" card is a classic hard-to-retain set. Rather than gut it into one six-way cloze, regroup it around something meaningful - here, geography (the three Benelux countries form a natural sub-group) plus a small amount of structure:
+
+```
+Card 1 (cloze - the Benelux sub-group is a tight, memorable set)
+Text: 🇪🇺 The three <b>Benelux</b> founding members of the EEC were:<ul><li>{{c1::Belgium}}</li><li>{{c2::the Netherlands}}</li><li>{{c3::Luxembourg}}</li></ul>
+Back Extra: 🤝 "Benelux" is itself a clue to the membership.
+Tags: history::eu::founding_members
+
+Card 2 (Q&A - the three larger states)
+Front: 🇪🇺 Apart from the Benelux trio, which three larger states founded the EEC in 1957?
+Back: 🏛️ <b>France</b>, <b>West Germany</b>, and <b>Italy</b>.
+Tags: history::eu::founding_members
+
+Card 3 (Q&A - anchors the whole set to a date and number)
+Front: 🇪🇺 How many states founded the EEC, and in what year?
+Back: 6️⃣ <b>Six</b> states, in <b>1957</b> (Treaty of Rome).
+Tags: history::eu::founding_members
+```
+
+Three structured cards beat one flat six-item cloze: the Benelux grouping carries its own mnemonic, the "three larger states" framing is easy to hold, and the date/number card ties the set together. This is Wozniak's set-to-meaningful-listing technique in miniature.
 
 ---
 
