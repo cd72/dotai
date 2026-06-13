@@ -37,6 +37,7 @@ Each card tests **one specific piece of information**. If a concept has multiple
 - A list of 3+ comma-separated items that are independent facts (not a fixed sequence) → split into separate Q&A cards or a cloze.
 - Two or more full sentences each asserting a different fact → split; the second sentence is a new card.
 - The word "and" joining two independent clauses → often a split point.
+- **A list whose items are not true peers** → do NOT enumerate them in one card. If one item contains the others, or the items relate hierarchically (X contains Y; X joins to Z; X is a kind of Y), the flat list hides the structure that actually needs learning. Source material often presents such items as a single flat bullet list, which obscures the hierarchy - do not mirror that layout. Instead write separate cards that each test one item *and* at least one card that tests the containment or relationship explicitly (e.g. "How do Y and Z relate to X?"). Only enumerate as a single list/cloze when the items genuinely sit at the same level (e.g. the five Great Lakes, lifecycle stages in sequence).
 
 **Bad (too much at once):**
 - Front: What is photosynthesis?
@@ -74,6 +75,7 @@ Each card tests **one specific piece of information**. If a concept has multiple
 - Keep explanations short - one or two sentences. The card is for recall, not re-reading the textbook.
 - Include short examples on the back when they aid understanding (e.g., for an abstract concept like "lazy evaluation", give a one-line example).
 - Use new lines <br> and/or a blank line to separate the answer from the explanation.
+- **Never deliver a back as a single dense paragraph when it contains more than one distinct point.** Even within an atomic card, put the answer on its own line, then the explanation, then any quote - each separated by `<br>`. A wall of text with no line breaks is hard to scan during review and is treated as a defect to fix before output.
 
 
 ### What to skip
