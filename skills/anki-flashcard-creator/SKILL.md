@@ -17,7 +17,7 @@ Follow these steps in order.
 4. **Draft the cards** following the rules in the next section.
 5. **Review every drafted card for atomicity before writing any output.** For each card ask two questions: (a) *Does the front have exactly one correct answer?* (b) *If I deleted one sentence from the back, would the card still be a complete, valid card?* If the answer to (a) is no, narrow the front. If the answer to (b) is yes, that sentence belongs on a separate card. This step is not optional — failure to split is the single most common quality problem in generated decks.
 6. **Display a preview in chat** — show the cards in a readable format so the user can sanity-check before importing.
-7. **Generate the TSV files** in `/mnt/user-data/outputs/`, then present them with the `present_files` tool.
+6. **Generate the TSV files** in `/mnt/user-data/outputs/`, then present them with the `present_files` tool.
 
 ## Card-writing rules
 
@@ -51,7 +51,19 @@ Each card tests **one specific piece of information**. If a concept has multiple
 ### Question style
 
 - **Default to Q&A format.** Rephrase facts as a clear question with a definitive answer. Use Q&A for conceptual understanding, processes, and "why" / "how" questions.
-- **Use cloze deletion sparingly** — only when a list of items needs memorising and Q&A would feel forced (e.g., "The five Great Lakes are {{c1::Superior}}, {{c2::Michigan}}, {{c3::Huron}}, {{c4::Erie}}, and {{c5::Ontario}}."). Don't reach for cloze just because the source sentence is convenient to gut.
+- **Use cloze when a single card's answer contains 3 or more independent items** — a list, sequence, enumeration, or set of named steps where the items themselves are what needs memorising. When you do, lay the items out as an HTML list (one cloze per `<li>`) rather than as a comma-separated sentence — see "Cloze formatting" below for the required markup. For example, the five Great Lakes become:
+  ```html
+  The five Great Lakes are:
+  <ul>
+    <li>{{c1::Superior}}</li>
+    <li>{{c2::Michigan}}</li>
+    <li>{{c3::Huron}}</li>
+    <li>{{c4::Erie}}</li>
+    <li>{{c5::Ontario}}</li>
+  </ul>
+  ```
+  If you can write a clean Q&A card instead, do that. Don't reach for cloze just because the source sentence is convenient to gut.
+- **When cloze cards exist, the cloze TSV file is required** — generate it automatically alongside the basic TSV. Do not wait to be asked.
 - **Write unambiguous prompts.** A good prompt has exactly one correct answer. If the question could reasonably have several answers, narrow it: "What was the **immediate** cause of WWI?" rather than "What caused WWI?"
 - **Avoid yes/no questions.** They give a 50% chance of being right by guessing and don't test real understanding. Reframe: instead of "Is the mitochondrion the powerhouse of the cell?" ask "Which organelle is known as the powerhouse of the cell?"
 - **Add enough context that the card makes sense in isolation.** When the user reviews this card in 6 months, they won't remember it came from chapter 3 of a specific book. "What does the second argument do?" is unreviewable; "In Python's `range()` function, what does the second argument specify?" is fine.
@@ -82,14 +94,40 @@ Each card tests **one specific piece of information**. If a concept has multiple
 - **Start each side with an emoji** — one on the front, one on the back, before any other content. Vary the emojis across the deck; don't reuse the same one for every card. Pick emojis that loosely relate to the topic (🧬 for biology, ⚖️ for law, 🏛️ for history, 💡 for definitions, ⚙️ for processes, 📐 for maths, 🔁 for cycles, etc.).
 - **Bold key terms** on the front and back so the eye lands on the important word fast.
 - For direct quotes from the source, wrap them in `<i>` and include them on the back like: `<br><br><i>"…direct quote here…"</i>`.
-- Do not use the em dash
 
 ### Cloze formatting
 
 - When you do use cloze cards, follow Anki's syntax: `{{c1::hidden text}}`, `{{c2::another piece}}`, etc. Each `c1`, `c2`, `c3` produces a separate card from the same note, hiding one piece at a time. Use this for genuine lists or sequences only.
-- Make cards look attractive and separate long lines onto multiple lines where possible.
-- Use `<li>` and either `<ul>` or `<ol>` HTML tags to ensure that any lists of items look great on the card.
+- **Lay the items out as an HTML list by default — never as a comma-separated run of clozes in a single sentence.** A cloze note almost always exists *because* it holds a list or sequence, and lists render far more legibly stacked vertically than inline: each item gets its own line, the eye can find the gap being tested, and a long enumeration doesn't wrap into an unreadable blob. Inline `{{c1::a}}, {{c2::b}}, {{c3::c}}` is the most common formatting mistake on these cards — treat it as wrong unless the content genuinely is a single flowing sentence (rare).
+- Use `<ol>` for sequences or rankings where the **order matters** (chronological steps, a name-change lineage, smallest-to-largest), and `<ul>` for unordered sets where order is irrelevant. Put one cloze per `<li>`. Keep any introductory stem as a short lead-in line before the list so the card still makes sense in isolation.
 - You may add a hint inside the cloze with `::hint`, e.g. `{{c1::Superior::largest by area}}`.
+
+**Bad (inline — cramped and hard to read):**
+```html
+The first three US presidents were {{c1::Washington}}, {{c2::Adams}}, and {{c3::Jefferson}}.
+```
+
+**Good (ordered list — order matters, so `<ol>`):**
+```html
+The first three US presidents, in order, were:
+<ol>
+  <li>{{c1::Washington}}</li>
+  <li>{{c2::Adams}}</li>
+  <li>{{c3::Jefferson}}</li>
+</ol>
+```
+
+**Good (unordered set — order irrelevant, so `<ul>`):**
+```html
+The three primary colours are:
+<ul>
+  <li>{{c1::red}}</li>
+  <li>{{c2::blue}}</li>
+  <li>{{c3::yellow}}</li>
+</ul>
+```
+
+Note on the TSV file: each note must still occupy exactly one line, so write the list markup with no literal newlines inside the field (the `<li>`/`<ul>` tags handle the visual line breaks themselves). The HTML renders correctly regardless of internal whitespace.
 
 ## Output format
 

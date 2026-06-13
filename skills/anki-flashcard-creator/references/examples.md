@@ -45,8 +45,8 @@ Front: 💨 How many <b>CO₂</b> molecules are released per turn of the Krebs c
 Back: 🌫️ <b>2 CO₂</b> molecules per acetyl-CoA.
 Tags: biology metabolism krebs_cycle
 
-Card 6 (cloze — list of products is a good cloze fit)
-Text: 🧪 Per acetyl-CoA, the Krebs cycle produces {{c1::3}} NADH, {{c2::1}} FADH₂, {{c3::1}} GTP, and {{c4::2}} CO₂.
+Card 6 (cloze — list of products is a good cloze fit; items stacked as a list, not inline)
+Text: 🧪 Per acetyl-CoA, the Krebs cycle produces:<ul><li>{{c1::3}} NADH</li><li>{{c2::1}} FADH₂</li><li>{{c3::1}} GTP</li><li>{{c4::2}} CO₂</li></ul>
 Tags: biology metabolism krebs_cycle
 ```
 
@@ -97,8 +97,8 @@ For code-heavy material, prefer Q&A format ("what does X do") and small "fill in
 This is a perfect cloze candidate — the four-part list maps cleanly to four cloze deletions, and the order matters.
 
 ```
-Card 1 (cloze, single note → 4 cards)
-Text: ⚖️ <b>Negligence</b> requires four elements: {{c1::duty of care}}, {{c2::breach of duty}}, {{c3::causation}}, and {{c4::remoteness of damage}}.
+Card 1 (cloze, single note → 4 cards; unordered set, so <ul>)
+Text: ⚖️ <b>Negligence</b> requires four elements:<ul><li>{{c1::duty of care}}</li><li>{{c2::breach of duty}}</li><li>{{c3::causation}}</li><li>{{c4::remoteness of damage}}</li></ul>
 Tags: law tort negligence
 ```
 
@@ -127,8 +127,8 @@ This pairs the structural memory (the four-element list, via cloze) with the con
 > "The OSI model has seven layers, from bottom to top: Physical, Data Link, Network, Transport, Session, Presentation, Application."
 
 ```
-Card 1 (cloze for the sequence)
-Text: 🌐 The seven layers of the <b>OSI model</b>, bottom to top, are: {{c1::Physical}}, {{c2::Data Link}}, {{c3::Network}}, {{c4::Transport}}, {{c5::Session}}, {{c6::Presentation}}, {{c7::Application}}.
+Card 1 (cloze for the sequence; order matters, so <ol>)
+Text: 🌐 The seven layers of the <b>OSI model</b>, bottom to top, are:<ol><li>{{c1::Physical}}</li><li>{{c2::Data Link}}</li><li>{{c3::Network}}</li><li>{{c4::Transport}}</li><li>{{c5::Session}}</li><li>{{c6::Presentation}}</li><li>{{c7::Application}}</li></ol>
 Tags: networking osi_model
 
 Card 2 (Q&A for the position of each — separate card per layer)
