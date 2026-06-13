@@ -141,7 +141,7 @@ Produce **two TSV files** (Tab-Separated Values) saved to `/mnt/user-data/output
 
 Generate only the files you need - if there are no cloze cards, skip that file. If there are no basic cards (rare), skip that file.
 
-The user will import each file separately into Anki: **File → Import** (Ctrl+Shift+I), pick the file, confirm, done. The headers handle note type and tags automatically.
+The user will import each file separately into Anki: **File → Import** (Ctrl+Shift+I), pick the file, confirm, done. The headers set the note type and tags automatically, and **pre-select** a deck (see `#deck:` below) - the user can still pick a different deck in the import dialog before confirming.
 
 ### Basic TSV format
 
@@ -149,6 +149,7 @@ The user will import each file separately into Anki: **File → Import** (Ctrl+S
 #separator:tab
 #html:true
 #notetype:Basic
+#deck:<deck name>
 #tags column:3
 <front><TAB><back><TAB><tags>
 <front><TAB><back><TAB><tags>
@@ -158,7 +159,8 @@ The user will import each file separately into Anki: **File → Import** (Ctrl+S
 - `#separator:tab` - tells Anki the columns are tab-separated.
 - `#html:true` - tells Anki to render the `<b>`, `<i>`, `<br>` etc. instead of showing them as text.
 - `#notetype:Basic` - sets the note type so the user doesn't have to.
-- `#tags column:3` - tells Anki the third column is the tags (space-separated).
+- `#deck:<deck name>` - pre-selects a deck in the import dialog. This is a default, not a lock.  Use a readable deck name here (e.g. `Spanish Verbs`, `Biology::Cell Structure`), **not** the underscored filename slug. Omit this line if you don't have a sensible deck name. (Do **not** use a per-note `#deck column:` instead - that one *does* force placement and auto-creates decks, which is not what we want.)
+- `#tags column:3` - tells Anki the third *data* column is the tags (space-separated). Note: this number counts the tab-separated columns in the card rows, not the header lines - adding the `#deck:` line above does **not** change it.
 - Each subsequent line is one card: front, tab, back, tab, tags.
 
 ### Cloze TSV format
@@ -167,12 +169,13 @@ The user will import each file separately into Anki: **File → Import** (Ctrl+S
 #separator:tab
 #html:true
 #notetype:Cloze
+#deck:<deck name>
 #tags column:2
 <text with {{c1::cloze}}><TAB><tags>
 ...
 ```
 
-Cloze cards have only one content field (the text with the cloze deletions in it) plus tags.
+Cloze cards have only one content field (the text with the cloze deletions in it) plus tags. 
 
 ### Tags
 
@@ -198,6 +201,7 @@ with open('/mnt/user-data/outputs/deck_basic.tsv', 'w', encoding='utf-8', newlin
     f.write('#separator:tab\n')
     f.write('#html:true\n')
     f.write('#notetype:Basic\n')
+    f.write(f'#deck:{deck_display_name}\n')  # readable name; pre-selects an existing deck, user can override
     f.write('#tags column:3\n')
     for front, back, tags in cards:
         f.write('\t'.join(sanitise(c) for c in (front, back, tags)) + '\n')
@@ -222,8 +226,7 @@ Back: 🔬 In the **chloroplasts**, specifically within the thylakoid membranes.
 For a long deck (say 30+ cards), show the first 5–10 as a preview with a note like "Showing first 8 of 47 cards - full set is in the TSV file" rather than dumping everything. Then offer to show specific cards or the full list if asked.
 
 ## Deck naming
-
-If the user gave the source a clear name (a filename, a chapter title, a topic), use that - sanitised to lowercase with underscores. If not, ask them what to call the deck before generating the files. Don't default to a generic name like "deck" - the user will end up with five files all called the same thing.
+what to call the deck before generating the files - don't default to a generic name like "deck", or the user will end up with several files all called the same thing.
 
 ## Edge cases
 
