@@ -7,6 +7,8 @@ description: Generate high-quality Anki flashcards from source material - articl
 
 Turn any source material into a deck of well-crafted Anki flashcards that follow established spaced-repetition principles, then deliver them both as an inline preview and as Anki-importable TSV files.
 
+<!-- Maintainers: if you change the output format (headers, columns, escaping, cloze markup, note types, files) or any card-generation behaviour, test before shipping - see evals/README.md for the decision table and how to run evals/validate.py. -->
+
 ## Workflow
 
 Follow these steps in order.

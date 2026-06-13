@@ -1,0 +1,41 @@
+The Immune System: An Overview
+
+The immune system is the body's defence network against pathogens - disease-causing
+organisms such as bacteria, viruses, fungi, and parasites. It is conventionally divided
+into two branches that work together: the innate immune system and the adaptive immune
+system.
+
+The innate immune system is the body's first responder. It is non-specific, meaning it
+attacks any foreign material in the same general way, and it acts within minutes to hours.
+Its defences fall into three lines: physical and chemical barriers (the skin, mucous
+membranes, stomach acid, and tears), cellular defences (phagocytes such as macrophages and
+neutrophils that engulf and digest pathogens), and the inflammatory response. Crucially,
+the innate system has no memory: it responds identically every time it meets the same
+pathogen.
+
+The adaptive immune system, by contrast, is specific and slower, taking days to mount a
+full response on first exposure. Its defining feature is immunological memory - after an
+infection it retains long-lived memory cells, so a second encounter with the same pathogen
+produces a far faster and stronger response. This is the principle on which vaccination
+depends. The adaptive response is carried out chiefly by two classes of lymphocyte: B cells
+and T cells. B cells produce antibodies, proteins that bind to specific antigens and mark
+them for destruction. T cells come in two main types: helper T cells, which coordinate the
+immune response by releasing signalling molecules called cytokines, and cytotoxic T cells,
+which directly kill infected body cells.
+
+An antigen is any molecule that the immune system can recognise as foreign and that
+triggers an immune response. Antibodies are exquisitely specific: each antibody recognises
+just one antigen, fitting it like a key in a lock.
+
+The inflammatory response is a key innate mechanism. It unfolds in a characteristic
+sequence: first, damaged tissue and immune cells release chemical signals such as histamine;
+second, these signals cause local blood vessels to dilate and become more permeable; third,
+increased blood flow brings phagocytes and clotting factors to the site; fourth, phagocytes
+engulf pathogens and debris. The visible signs of inflammation are the classic four:
+redness, heat, swelling, and pain.
+
+Vaccination exploits immunological memory deliberately. A vaccine introduces a harmless
+form of a pathogen - a weakened or killed microbe, or just a fragment such as a surface
+protein - so that the adaptive system mounts a response and forms memory cells without the
+person suffering the actual disease. On later exposure to the real pathogen, the memory
+response neutralises it before illness develops.

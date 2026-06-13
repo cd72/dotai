@@ -1,0 +1,38 @@
+{
+  "skill_name": "anki-flashcard-creator",
+  "note": "Test prompts for the skill. Each 'feature' field says which behaviour it exercises. After a change, run the prompt(s) whose feature your change touched, save the TSV output, then run validate.py on it. See README.md.",
+  "evals": [
+    {
+      "id": 0,
+      "name": "code-escaping",
+      "feature": "literal <, >, & escaping for code/maths (HTML-rendering trap)",
+      "prompt": "Make me Anki flashcards from these C++ notes:\n\nIn C++, std::vector<T> is a dynamic array; to declare a vector of integers you write std::vector<int> v;. A map from string to int is std::map<std::string, int>. References use the & symbol: a function void swap(int& a, int& b) swaps two ints in place. The boolean expression a < b && b < c is true only when b lies strictly between a and c. The stream-extraction operator >> reads input, as in std::cin >> x;. Templates enable generic code: template<typename T> T maximum(T a, T b) returns the larger argument.",
+      "expected_output": "Basic TSV with literal <, >, & escaped to &lt; &gt; &amp; so type names survive HTML rendering. Atomic Q&A cards. No em dashes. Hierarchical tags.",
+      "files": []
+    },
+    {
+      "id": 1,
+      "name": "vocab-reversed",
+      "feature": "reversed note type for vocabulary (Basic (and reversed card))",
+      "prompt": "Turn this French vocab list into flashcards I can revise from:\nla maison - house\nmanger - to eat\nrapide - quick / fast\nle chien - dog\napprendre - to learn\ndifficile - difficult\nle livre - book",
+      "expected_output": "A reversed TSV using #notetype:Basic (and reversed card) so each pair becomes two cards (FR->EN and EN->FR). Atomic single-answer pairs.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "mixed-source",
+      "feature": "basic + cloze split, atomicity, cloze Back Extra, hierarchical tags, scope handling",
+      "prompt": "Can you make some study cards from this passage on the immune system?",
+      "expected_output": "Basic + cloze TSVs. Atomic cards for definitions/processes; cloze (HTML list, Back Extra populated) for genuine enumerations. Tags applied.",
+      "files": ["samples/immune_system.txt"]
+    },
+    {
+      "id": 3,
+      "name": "overlapping-cloze",
+      "feature": "overlapping (sliding-window) cloze for a long ordered sequence; date stamping",
+      "prompt": "I need to memorise the order of the first ten elements of the periodic table for a chemistry exam - the exact sequence matters. Make me Anki cards.",
+      "expected_output": "Cloze TSV using sliding-window overlapping cloze (one c1 per note, hides one item, shows neighbours) rather than one giant stacked deletion. Hierarchical tags.",
+      "files": []
+    }
+  ]
+}
