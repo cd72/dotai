@@ -47,6 +47,7 @@ Tags: biology metabolism krebs_cycle
 
 Card 6 (cloze - list of products is a good cloze fit; items stacked as a list, not inline)
 Text: 🧪 Per acetyl-CoA, the Krebs cycle produces:<ul><li>{{c1::3}} NADH</li><li>{{c2::1}} FADH₂</li><li>{{c3::1}} GTP</li><li>{{c4::2}} CO₂</li></ul>
+Back Extra: 🔬 Yields per single turn of the cycle.<br><i>"…it produces 3 NADH, 1 FADH2, 1 GTP… and 2 CO2."</i>
 Tags: biology metabolism krebs_cycle
 ```
 
@@ -84,6 +85,17 @@ Back: 📦 <code>(1, 'a')</code>, <code>(2, 'b')</code>, <code>(3, 'c')</code>.
 Tags: python builtins iteration examples
 ```
 
+Note the angle-bracket trap for typed/generic code. A card about a C++ or Java generic must escape the literal `<` and `>`, or Anki (with `#html:true`) will treat them as tags and they'll disappear:
+
+```
+Card 5
+Front: 🧩 In C++, how do you declare a vector of integers?
+Back: ⌨️ <code>std::vector&lt;int&gt; v;</code>   ← written as &amp;lt; / &amp;gt; so it renders as std::vector<int>
+Tags: cpp stl containers
+```
+
+The `&lt;`/`&gt;` in the source line above render on the card as the literal `<` and `>`. If you wrote a bare `<int>`, the card back would show `std::vector v;` with the type silently gone.
+
 For code-heavy material, prefer Q&A format ("what does X do") and small "fill in the syntax" cards over big cloze deletions of full code blocks - those tend to be unreviewable.
 
 ---
@@ -99,6 +111,7 @@ This is a perfect cloze candidate - the four-part list maps cleanly to four cloz
 ```
 Card 1 (cloze, single note → 4 cards; unordered set, so <ul>)
 Text: ⚖️ <b>Negligence</b> requires four elements:<ul><li>{{c1::duty of care}}</li><li>{{c2::breach of duty}}</li><li>{{c3::causation}}</li><li>{{c4::remoteness of damage}}</li></ul>
+Back Extra: 📚 All four must be proved for liability to arise.<br><i>"Negligence is established when four elements are proved…"</i>
 Tags: law tort negligence
 ```
 
@@ -143,6 +156,34 @@ Tags: networking osi_model
 ```
 
 For a 7-item sequence, don't make 7 separate "what comes after X" cards - that's overkill and the cloze captures the order. Just add a few cards for the most-tested positions or distinguishing features.
+
+---
+
+## Example 5: Vocabulary (bidirectional)
+
+**Source excerpt** (Spanish vocabulary list):
+
+> "aprender - to learn; el libro - the book; rápido - quick, fast"
+
+Vocabulary is the textbook case for the **`Basic (and reversed card)`** note type: the learner needs both directions (Spanish→English to read, English→Spanish to produce), and each direction has a single right answer. Write each pair once; Anki makes the two cards.
+
+```
+(file: spanish_vocab_reversed.tsv, #notetype:Basic (and reversed card))
+
+Front: 🇪🇸 <b>aprender</b>
+Back: 🇬🇧 to learn
+Tags: spanish vocab verbs
+
+Front: 🇪🇸 <b>el libro</b>
+Back: 🇬🇧 the book
+Tags: spanish vocab nouns
+
+Front: 🇪🇸 <b>rápido</b>
+Back: 🇬🇧 quick, fast
+Tags: spanish vocab adjectives
+```
+
+Keep these cards genuinely atomic and symmetric. If a word has several distinct senses that aren't simple synonyms, split them into separate notes rather than cramming them onto one back - a reversed card with three unrelated meanings on the back becomes ambiguous in the English→Spanish direction. (Here "quick, fast" are close synonyms, so one card is fine.) Don't reverse cards whose back isn't a clean, single answer - reserve `Basic (and reversed card)` for true pairs.
 
 ---
 

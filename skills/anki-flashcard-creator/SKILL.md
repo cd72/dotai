@@ -17,7 +17,7 @@ Follow these steps in order.
 4. **Draft the cards** following the rules in the next section.
 5. **Review every drafted card for atomicity before writing any output.** For each card ask two questions: (a) *Does the front have exactly one correct answer?* (b) *If I deleted one sentence from the back, would the card still be a complete, valid card?* If the answer to (a) is no, narrow the front. If the answer to (b) is yes, that sentence belongs on a separate card. This step is not optional - failure to split is the single most common quality problem in generated decks.
 6. **Display a preview in chat** - show the cards in a readable format so the user can sanity-check before importing.
-6. **Generate the TSV files** in `/mnt/user-data/outputs/`, then present them with the `present_files` tool.
+7. **Generate the TSV files** in `/mnt/user-data/outputs/`, then present them with the `present_files` tool.
 
 ## Card-writing rules
 
@@ -63,7 +63,7 @@ Each card tests **one specific piece of information**. If a concept has multiple
     <li>{{c5::Ontario}}</li>
   </ul>
   ```
-  If you can write a clean Q&A card instead, do that. Don't reach for cloze just because the source sentence is convenient to gut.
+  If you can write a clean Q&A card instead, do that. Don't reach for cloze just because the source sentence is convenient to gut. Bear in mind the SuperMemo guidance that *enumerations and unordered sets are intrinsically hard to retain* (Wozniak's rules on avoiding sets and enumerations): even a list of genuine peers is harder to learn than a set of meaningful Q&A cards. So treat a cloze list as a last resort - prefer recasting the items into Q&A by distinguishing feature or relationship ("Which Great Lake is the largest by area?"), and reserve the cloze list for cases where the bare membership or order of the list really is the thing being memorised.
 - **When cloze cards exist, the cloze TSV file is required** - generate it automatically alongside the basic TSV. Do not wait to be asked.
 - **Write unambiguous prompts.** A good prompt has exactly one correct answer. If the question could reasonably have several answers, narrow it: "What was the **immediate** cause of WWI?" rather than "What caused WWI?"
 - **Avoid yes/no questions.** They give a 50% chance of being right by guessing and don't test real understanding. Reframe: instead of "Is the mitochondrion the powerhouse of the cell?" ask "Which organelle is known as the powerhouse of the cell?"
@@ -76,6 +76,27 @@ Each card tests **one specific piece of information**. If a concept has multiple
 - Include short examples on the back when they aid understanding (e.g., for an abstract concept like "lazy evaluation", give a one-line example).
 - Use new lines <br> and/or a blank line to separate the answer from the explanation.
 - **Never deliver a back as a single dense paragraph when it contains more than one distinct point.** Even within an atomic card, put the answer on its own line, then the explanation, then any quote - each separated by `<br>`. A wall of text with no line breaks is hard to scan during review and is treated as a defect to fix before output.
+
+
+### Reversed (bidirectional) cards
+
+Some material needs to be recalled in *both* directions, and a one-way Q&A card only trains one of them. The classic case is anything where the front and back are a symmetric pair the user must produce either way round:
+
+- **Vocabulary and translation** - `gato` ↔ `cat`, a foreign word and its meaning. The learner needs to go word→meaning *and* meaning→word.
+- **Term ↔ definition** where both recall directions are genuinely useful (e.g. a symbol and its name, an abbreviation and its expansion).
+
+For these, use Anki's **`Basic (and reversed card)`** note type instead of `Basic`. It takes the same two fields (Front, Back) but generates *two* cards per note - one in each direction - so you write the pair once. Emit a third TSV file for these, identical to the basic format but with `#notetype:Basic (and reversed card)`:
+
+```
+#separator:tab
+#html:true
+#notetype:Basic (and reversed card)
+#deck:<deck name>
+#tags column:3
+<front><TAB><back><TAB><tags>
+```
+
+When the source is clearly a vocabulary list, a glossary, or term/definition pairs, default to offering reversed cards (or just produce them and say so in the preview). Do **not** make cards reversible by default for ordinary factual Q&A - "Which organelle is the powerhouse of the cell?" reversed becomes "🧬 mitochondrion → ?", which has many valid answers and trains nothing. Reverse only when *both* directions have a single, well-defined answer.
 
 
 ### What to skip
@@ -94,7 +115,8 @@ Each card tests **one specific piece of information**. If a concept has multiple
   - `<i>` for emphasis or quoted phrases from the source.
   - `<br>` for line breaks within a card.
   - `<span style="color:#0066cc">…</span>` sparingly to highlight a critical word.
-- **Start each side with an emoji** - one on the front, one on the back, before any other content. Vary the emojis across the deck; don't reuse the same one for every card. Pick emojis that loosely relate to the topic (🧬 for biology, ⚖️ for law, 🏛️ for history, 💡 for definitions, ⚙️ for processes, 📐 for maths, 🔁 for cycles, etc.).
+- **Escape literal `<`, `>` and `&` that are NOT your own markup.** Because the files set `#html:true`, Anki parses every `<…>` as an HTML tag. So literal angle brackets in the *content* - `vector<int>`, `List<String>`, `template<T>`, or an inequality like `x < y` - will be swallowed and vanish on the rendered card. Write these as `&lt;` and `&gt;` (and a literal ampersand, e.g. `R&D`, `AT&T`, the `&&` operator, as `&amp;`). Do **not** blanket-escape the whole field - that would destroy your intentional `<b>`, `<br>`, `<ul>` tags. Escape only the literal source characters, leaving the formatting tags as real HTML. This is the most common way a code or maths card silently breaks, so check every card whose content contains `<`, `>` or `&` before output.
+- **Start each side with an emoji** - one on the front, one on the back, before any other content. This is a house-style preference, not a spaced-repetition principle. Vary the emojis across the deck; don't reuse the same one for every card. Pick emojis that loosely relate to the topic (🧬 for biology, ⚖️ for law, 🏛️ for history, 💡 for definitions, ⚙️ for processes, 📐 for maths, 🔁 for cycles, etc.). One caution: keep the emoji *loosely* topical, not a giveaway - an emoji that uniquely identifies the answer becomes an incidental retrieval cue (the learner recognises the picture instead of recalling the fact). If a user prefers plain cards, drop the emojis entirely.
 - **Bold key terms** on the front and back so the eye lands on the important word fast.
 - For direct quotes from the source, wrap them in `<i>` and include them on the back like: `<br><br><i>"…direct quote here…"</i>`.
 
@@ -134,14 +156,17 @@ Note on the TSV file: each note must still occupy exactly one line, so write the
 
 ## Output format
 
-Produce **two TSV files** (Tab-Separated Values) saved to `/mnt/user-data/outputs/`:
+Produce up to **three TSV files** (Tab-Separated Values) saved to `/mnt/user-data/outputs/`, depending on which card types you generated:
 
-1. `<deck-name>_basic.tsv` - for Q&A cards
-2. `<deck-name>_cloze.tsv` - for cloze cards
+1. `<deck-name>_basic.tsv` - for one-way Q&A cards (`#notetype:Basic`)
+2. `<deck-name>_cloze.tsv` - for cloze cards (`#notetype:Cloze`)
+3. `<deck-name>_reversed.tsv` - for bidirectional cards such as vocabulary (`#notetype:Basic (and reversed card)`)
 
-Generate only the files you need - if there are no cloze cards, skip that file. If there are no basic cards (rare), skip that file.
+Generate only the files you need - skip any type you didn't produce. Most decks are just basic, or basic + cloze; the reversed file appears mainly for vocabulary/glossary sources.
 
 The user will import each file separately into Anki: **File → Import** (Ctrl+Shift+I), pick the file, confirm, done. The headers set the note type and tags automatically, and **pre-select** a deck (see `#deck:` below) - the user can still pick a different deck in the import dialog before confirming.
+
+**Re-importing / duplicates.** Anki detects duplicate notes by the **first field** (the front, or the cloze text). Two consequences worth knowing: keep fronts unique, or near-identical fronts will trip the duplicate check; and if the user re-runs this skill on the same source and re-imports, Anki's import dialog has an "Existing notes" setting (Update / Preserve / Duplicate) that decides whether matching notes are updated or added again. Mention this if the user is iterating on a deck they've already imported.
 
 ### Basic TSV format
 
@@ -170,12 +195,12 @@ The user will import each file separately into Anki: **File → Import** (Ctrl+S
 #html:true
 #notetype:Cloze
 #deck:<deck name>
-#tags column:2
-<text with {{c1::cloze}}><TAB><tags>
+#tags column:3
+<text with {{c1::cloze}}><TAB><back extra><TAB><tags>
 ...
 ```
 
-Cloze cards have only one content field (the text with the cloze deletions in it) plus tags. 
+The built-in Cloze note type has two content fields, **Text** and **Back Extra**, plus tags - so the columns are: cloze text, then Back Extra, then tags. Back Extra shows *below* the answer on the back of every card generated from the note, so it's the right home for the short explanation and source quote that Q&A cards put on their back - this keeps cloze cards anchored to the source too, rather than being bare gutted sentences. Leave the Back Extra field empty (an empty column, but keep the tab) when there's genuinely nothing useful to add. Because Back Extra is now column 2, tags move to column 3: set `#tags column:3`.
 
 ### Tags
 
@@ -187,6 +212,7 @@ TSV breaks easily. Before writing each card, ensure:
 
 - **No literal tabs inside fields.** If the content needs whitespace, use a regular space or `<br>`.
 - **No literal newlines inside fields.** Each card must be exactly one line in the file. Use `<br>` for any line break the user should see in Anki.
+- **Literal `<`, `>`, `&` must already be escaped to `&lt;`, `&gt;`, `&amp;` in the card text** (see the formatting rules above). This is a content decision made while drafting each card - the `sanitise()` helper below deliberately does NOT touch angle brackets, because it can't tell your real `<b>` tags from a literal `vector<int>`. Get it right when you write the card.
 - **Quotes are fine** - TSV doesn't need to escape `"` the way CSV does.
 - **UTF-8 encoding** - write the file in UTF-8 (Python's default with `open(path, 'w', encoding='utf-8')`).
 
@@ -205,6 +231,16 @@ with open('/mnt/user-data/outputs/deck_basic.tsv', 'w', encoding='utf-8', newlin
     f.write('#tags column:3\n')
     for front, back, tags in cards:
         f.write('\t'.join(sanitise(c) for c in (front, back, tags)) + '\n')
+
+# Cloze file: three columns - text, Back Extra (may be ''), tags
+with open('/mnt/user-data/outputs/deck_cloze.tsv', 'w', encoding='utf-8', newline='') as f:
+    f.write('#separator:tab\n')
+    f.write('#html:true\n')
+    f.write('#notetype:Cloze\n')
+    f.write(f'#deck:{deck_display_name}\n')
+    f.write('#tags column:3\n')
+    for text, back_extra, tags in cloze_cards:
+        f.write('\t'.join(sanitise(c) for c in (text, back_extra, tags)) + '\n')
 ```
 
 This keeps quote characters (`"`, `'`) intact in the output, which matters because the back of cards often contains direct quotes from the source.
@@ -226,12 +262,14 @@ Back: 🔬 In the **chloroplasts**, specifically within the thylakoid membranes.
 For a long deck (say 30+ cards), show the first 5–10 as a preview with a note like "Showing first 8 of 47 cards - full set is in the TSV file" rather than dumping everything. Then offer to show specific cards or the full list if asked.
 
 ## Deck naming
-what to call the deck before generating the files - don't default to a generic name like "deck", or the user will end up with several files all called the same thing.
+
+Choose a descriptive deck name from the source topic *before* generating the files, and use it both for the `#deck:` header and the filename slug. Don't default to a generic name like "deck" or "flashcards" - if you do, a user who builds several decks ends up with a pile of files all called the same thing, and `#deck:deck` dumped together in Anki. Good names read like `Spanish Verbs`, `Biology::Cell Structure`, `Tort Law - Negligence` (the `::` creates a subdeck). Derive the filename slug from the same name in `lowercase_with_underscores` (e.g. `biology_cell_structure_basic.tsv`).
 
 ## Edge cases
 
 - **Source is in another language.** Generate the cards in the same language as the source unless the user asks otherwise. Adjust emoji choices and HTML escaping the same way.
-- **Source contains formulas / code.** Wrap formulas in `<code>…</code>` for inline rendering, or for multi-line code use `<pre>…</pre>`. For LaTeX, Anki uses `\(…\)` for inline and `\[…\]` for display math - the user will need MathJax enabled.
+- **Source contains formulas / code.** Wrap formulas in `<code>…</code>` for inline rendering, or for multi-line code use `<pre>…</pre>`. For LaTeX, Anki uses `\(…\)` for inline and `\[…\]` for display math - the user will need MathJax enabled. Remember that literal `<`, `>` and `&` inside code or inequalities must be escaped to `&lt;`, `&gt;`, `&amp;` (see the formatting rules) or they'll vanish under HTML rendering.
+- **Source has images/diagrams worth learning (anatomy, maps, charts).** TSV import cannot bundle media - Anki only finds images that already sit in the profile's `collection.media` folder, which this skill can't write to. So don't emit `<img>` tags pointing at files the user doesn't have; they'll just show as broken images. Instead, describe the visual in words on the card, and tell the user that image-based cards (including image occlusion for diagrams) need to be added manually inside Anki. Flag this whenever the source is genuinely visual and the text-only cards lose something important.
 - **Source is too thin to make a meaningful deck.** If the source is under ~200 words or just a list of trivia, tell the user honestly and ask whether they have more material to combine or whether they want cards on the small amount that's there.
 - **User asks for a specific number of cards.** Honour it - but if the number is way out of step with the source (e.g., 5 cards for an entire textbook chapter, or 100 cards for a one-page summary), say so and suggest a more sensible count.
 - **User wants only cloze, or only Q&A.** Honour the preference. Cloze-only decks are common for vocabulary or list-heavy material.
