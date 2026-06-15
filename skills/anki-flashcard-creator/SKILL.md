@@ -7,11 +7,11 @@ description: Generate high-quality Anki flashcards from source material - articl
 
 Turn any source material into a deck of well-crafted Anki flashcards that follow established spaced-repetition principles (Wozniak's 20 rules, SuperMemo guidance), then deliver them as an inline preview plus Anki-importable TSV files.
 
-<!-- Maintainers: if you change output format (headers, columns, escaping, cloze markup, note types, files) or card-generation behaviour, test before shipping - see evals/README.md and run evals/validate.py. -->
+<!-- Maintainers: if you change output format (headers, columns, escaping, cloze markup, note types, files) or card-generation behaviour, test before shipping - see evals/README.md and run scripts/check_deck.py. -->
 
 ## Why this skill is built around a loop
 
-Making cards that *import* is easy. Making cards that are *easy to learn* is the whole job, and it is a judgment task, not a formatting task. The defects that make a deck painful to review - a back that hides three facts, six fronts that differ only by a number, a question that gives away its own answer - are all invisible to a script. `evals/validate.py` can confirm a deck will import cleanly; it cannot tell you whether a single card is worth learning. Only careful per-card reasoning does that.
+Making cards that *import* is easy. Making cards that are *easy to learn* is the whole job, and it is a judgment task, not a formatting task. The defects that make a deck painful to review - a back that hides three facts, six fronts that differ only by a number, a question that gives away its own answer - are all invisible to a script. `scripts/check_deck.py` can confirm a deck will import cleanly; it cannot tell you whether a single card is worth learning. Only careful per-card reasoning does that.
 
 So the workflow below forces two things a first draft almost always skips:
 
@@ -28,7 +28,7 @@ Do not collapse or skip these. They are the difference between a draft and a dec
 4. **Choose the card type for each fact** - basic Q&A by default; cloze or reversed only when they genuinely fit (see "Choosing the card type").
 5. **Draft every card in three slots** (see next section). This is where atomicity is enforced.
 6. **Run the audit** (see "The audit"). Emit the per-card table. Fix every failure, then re-check.
-7. **Preview in chat**, then **write the TSV files** to `/mnt/user-data/outputs/`, run `validate.py` on them, and present them with `present_files`.
+7. **Preview in chat**, then **assemble the cards into a deck JSON and run the build script** - `python scripts/build_deck.py deck.json` writes the TSV files to `/mnt/user-data/outputs/`. Run `python scripts/check_deck.py /mnt/user-data/outputs/` to confirm they import cleanly, then present the files with `present_files`.
 
 ## Draft every card in three slots
 
@@ -109,9 +109,9 @@ Stable facts (anatomy, basic maths, history) need no stamp. Anything that goes o
 
 There are two kinds of check, and they are not interchangeable.
 
-**Mechanical checks - delegate to the script.** Em dash, HTML escaping, column counts, cloze syntax, emoji presence: these are lexical and `evals/validate.py` already checks them reliably. Run it on the finished TSV files (`python evals/validate.py /mnt/user-data/outputs/`). Do not hand-roll a regex for these.
+**Mechanical checks - delegate to the script.** Em dash, HTML escaping, column counts, cloze syntax: these are lexical and `scripts/check_deck.py` checks them reliably. Run it on the finished TSV files (`python scripts/check_deck.py /mnt/user-data/outputs/`). Do not hand-roll a regex for these.
 
-**Judgment checks - reason about every card yourself.** Atomicity, one-answer fronts, answer-telegraphing, interference, and cloze-vs-Q&A choice cannot be checked by any script. A green `validate.py` says only that the deck will *import* - it will happily pass a deck where every back hides three facts and every front interferes. **Never treat a passing script as evidence the cards are good.** (This is a real and easy trap: a character-level check for `—` and emoji can rubber-stamp a deck riddled with multi-fact backs.)
+**Judgment checks - reason about every card yourself.** Atomicity, one-answer fronts, answer-telegraphing, interference, and cloze-vs-Q&A choice cannot be checked by any script. A green `check_deck.py` says only that the deck will *import* - it will happily pass a deck where every back hides three facts and every front interferes. **Never treat a passing script as evidence the cards are good.** (This is a real and easy trap: a character-level check for `—` and emoji can rubber-stamp a deck riddled with multi-fact backs.)
 
 Before writing any file, emit a **per-card audit table** - one row per card - and reason through each judgment gate explicitly. Quote the offending text on any fail, fix it, and re-emit affected rows:
 
@@ -133,30 +133,36 @@ Emitting this table is mandatory and is the main quality gate. If you are tempte
 - **Use HTML, not Markdown** (Anki strips Markdown): `<b>` for key terms, `<i>` for emphasis or quotes, `<br>` for line breaks. Bold the key term on each side so the eye lands on it.
 - **Never include labels** like `Q:`, `A:`, `Front:` in card content - Anki provides the framing.
 
-For HTML escaping of literal `<`, `>`, `&` (the most common way code/maths cards silently break), the colour span, source-quote markup, and the TSV-writing script, see **references/formatting.md**. Check it before output for any card whose content contains `<`, `>` or `&`.
+For HTML escaping of literal `<`, `>`, `&` (the most common way code/maths cards silently break), the colour span, source-quote markup, and the deck JSON schema that `build_deck.py` expects, see **references/formatting.md**. Check it before output for any card whose content contains `<`, `>` or `&`.
 
 ## Output
 
-Write up to three TSV files to `/mnt/user-data/outputs/`: `<slug>_basic.tsv` always; `<slug>_cloze.tsv` if you made cloze cards; `<slug>_reversed.tsv` if you made reversed cards. Generate only what you produced.
+The cards are written by **`scripts/build_deck.py`**, not by hand. You produce a small **deck JSON** describing the cards (pure content - fronts, answers, context, tags, card type); the script serialises it into the correct TSV files. This is deliberate: the script guarantees correct headers, safe escaping, and - importantly - assembles each basic back as `answer` then a blank line then `context`, so answer-first formatting is structural rather than something you have to remember.
 
-**Basic TSV format:**
+Deck JSON shape (full schema and all three card types are in references/formatting.md):
+
+```json
+{
+  "deck_name": "Biology::Cell Structure",
+  "cards": [
+    {"type": "basic", "front": "🧬 …?", "answer": "⚡ …", "context": "…", "tags": ["biology::cell_structure"]},
+    {"type": "cloze", "text": "… {{c1::…}} …", "back_extra": "", "tags": ["…"]}
+  ]
+}
+```
+
+Then:
 
 ```
-#separator:tab
-#html:true
-#notetype:Basic
-#deck:<readable deck name>
-#tags column:3
-<front><TAB><back><TAB><tags>
+python scripts/build_deck.py deck.json /mnt/user-data/outputs/
+python scripts/check_deck.py /mnt/user-data/outputs/
 ```
 
-`#html:true` renders your tags; `#deck:` pre-selects a deck (a default the user can override); `#tags column:3` marks the third data column as space-separated tags. The cloze and reversed formats live in their reference files.
+`build_deck.py` writes only the files you need (`<slug>_basic.tsv`, and `_cloze.tsv` / `_reversed.tsv` only if those cards exist) and derives the slug from `deck_name`. `check_deck.py` is the mechanical gate from "The audit" above - run it every time, but remember it judges import-safety, not card quality.
 
-**Deck naming:** pick a descriptive name from the topic *before* generating (e.g. `Biology::Cell Structure`, not `deck`), use it for `#deck:` and derive the filename slug from it in `lowercase_with_underscores`.
+**Deck naming:** pick a descriptive `deck_name` from the topic *before* generating (e.g. `Biology::Cell Structure`, not `deck`). It sets the `#deck:` header (a default the user can override on import) and the filename slug.
 
 **Tags:** give every card 2-4 hierarchical tags using `::` (e.g. `biology::cell_structure::organelles`), plus a flat keyword or two for cross-cutting themes (`exam_critical`, `as_of_2026`). Keep the hierarchy two or three levels deep.
-
-**Write the file with a small Python script** (manual `\t`-join, never the `csv` module - it mangles quotes) and **run `validate.py` on the result** before presenting. The script and `sanitise()` helper are in references/formatting.md.
 
 **Preview format** (show first 5-10 for long decks, noting "showing first 8 of 47"):
 
@@ -172,6 +178,8 @@ Read these when the situation calls for them - they are not needed for an ordina
 
 - **references/cloze.md** - when cloze is justified, HTML-list markup, `<ol>` vs `<ul>`, hints, overlapping cloze for 6+ ordered sequences, regrouping sets, and the cloze TSV format.
 - **references/reversed-cards.md** - bidirectional cards, when both directions are single-answer, and the reversed TSV format.
-- **references/formatting.md** - full HTML rules, escaping `<`/`>`/`&`, colour, quotes, the TSV-writing script, and edge cases for type-in answers.
+- **references/formatting.md** - full HTML rules, escaping `<`/`>`/`&`, colour, quotes, the deck JSON schema for `build_deck.py`, and type-in answers.
 - **references/edge-cases.md** - other-language sources, code/LaTeX, image-heavy material and Image Occlusion, thin sources, and requested card counts.
 - **references/examples.md** - fully worked decks for tricky medical/scientific or code-heavy material.
+
+The skill bundles two scripts in **scripts/**: `build_deck.py` (deck JSON → TSV files) and `check_deck.py` (mechanical import-safety check). Both are meant to run at output time; neither judges card quality.

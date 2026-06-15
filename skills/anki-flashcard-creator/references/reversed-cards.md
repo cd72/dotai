@@ -28,4 +28,4 @@ Use Anki's **`Basic (and reversed card)`** note type. It takes the same two fiel
 <front><TAB><back><TAB><tags>
 ```
 
-The writing script is the same as for basic cards (see references/formatting.md) - only the `#notetype:` header changes.
+Reversed cards are written by `scripts/build_deck.py` from reversed-type card objects in your deck JSON (see references/formatting.md) - it emits this header automatically.

@@ -91,4 +91,4 @@ When you make any cloze cards, the cloze TSV file is **required** alongside the 
 
 The Cloze note type has two content fields, **Text** and **Back Extra**, plus tags - so the columns are: cloze text, then Back Extra, then tags. Back Extra shows below the answer on every card from the note, so it is the right home for the short explanation or source quote (the equivalent of a Q&A card's context). Leave it empty (an empty column, but keep the tab) only when there is genuinely nothing useful to add. Because Back Extra is column 2, tags are column 3: `#tags column:3`.
 
-See references/formatting.md for the writing script (the same `sanitise()` + manual `\t`-join applies).
+The cloze TSV is written by `scripts/build_deck.py` from your deck JSON (use cloze-type card objects); see references/formatting.md for the schema.

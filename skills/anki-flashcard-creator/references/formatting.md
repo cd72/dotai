@@ -1,6 +1,6 @@
 # Formatting and file-writing details
 
-Read this for HTML escaping, the colour span, source-quote markup, and the TSV-writing script. The everyday essentials (em dash ban, emoji, bold, HTML-not-Markdown, no labels) are in SKILL.md; this file is the full detail and the parts that matter most for code/maths cards.
+Read this for HTML escaping, the colour span, source-quote markup, and the deck JSON schema build_deck.py consumes. The everyday essentials (em dash ban, emoji, bold, HTML-not-Markdown, no labels) are in SKILL.md; this file is the full detail and the parts that matter most for code/maths cards.
 
 ## HTML formatting
 
@@ -16,7 +16,7 @@ Anki renders HTML natively and strips Markdown, so always use HTML:
 
 Because the files set `#html:true`, Anki parses every `<…>` as a tag. Literal angle brackets in your *content* - `vector<int>`, `List<String>`, `template<T>`, or an inequality like `x < y` - will be swallowed and vanish on the rendered card. Write these as `&lt;` and `&gt;`. Write a literal ampersand (`R&D`, `AT&T`, the `&&` operator) as `&amp;`.
 
-Do **not** blanket-escape the whole field - that would destroy your intentional `<b>`, `<br>`, `<ul>` tags. Escape only the literal source characters, leaving the formatting tags as real HTML. This is the most common way a code or maths card silently breaks, so check every card whose content contains `<`, `>` or `&` before output. `validate.py` will catch a stray unescaped bracket, but get it right while drafting.
+Do **not** blanket-escape the whole field - that would destroy your intentional `<b>`, `<br>`, `<ul>` tags. Escape only the literal source characters, leaving the formatting tags as real HTML. This is the most common way a code or maths card silently breaks, so check every card whose content contains `<`, `>` or `&` before output. `check_deck.py` will catch a stray unescaped bracket, but get it right while drafting.
 
 ## TSV escaping rules
 
@@ -28,37 +28,51 @@ TSV breaks easily. Per field:
 - **Quotes are fine** - TSV does not need to escape `"` the way CSV does.
 - **UTF-8 encoding.**
 
-## Writing the file
+## Writing the files: the deck JSON
 
-Generate the file with a small Python script. **Do not use Python's `csv` module** - `csv.QUOTE_NONE` with an `escapechar` mangles quote characters (you get `\"` in Anki). Manually `\t`-join the fields; the "no tabs/newlines inside fields" rule makes proper CSV escaping unnecessary, and this keeps `"` and `'` intact, which matters because backs often hold direct source quotes.
+You do not hand-write TSV files. You produce a **deck JSON** and run `scripts/build_deck.py`, which serialises it into the correct TSVs. This guarantees correct headers and escaping every run, and it assembles each basic back as answer-first (answer, blank line, context) so that formatting rule is enforced by the tool rather than left to memory. Under the hood it `\t`-joins manually (never Python's `csv` module, which mangles quotes) and applies a `sanitise()` that strips literal tabs/newlines/CR but deliberately leaves `<`, `>`, `&` untouched - those are your escaping decisions, made while drafting.
 
-```python
-def sanitise(cell: str) -> str:
-    # Defensively strip anything that would break the row.
-    # Note: deliberately does NOT touch <, >, & - escape those while drafting.
-    return cell.replace('\t', ' ').replace('\r', '').replace('\n', '<br>')
+Schema (one object per card; include only the card types you actually made):
 
-with open('/mnt/user-data/outputs/deck_basic.tsv', 'w', encoding='utf-8', newline='') as f:
-    f.write('#separator:tab\n')
-    f.write('#html:true\n')
-    f.write('#notetype:Basic\n')
-    f.write(f'#deck:{deck_display_name}\n')  # readable name; pre-selects a deck, user can override
-    f.write('#tags column:3\n')
-    for front, back, tags in cards:
-        f.write('\t'.join(sanitise(c) for c in (front, back, tags)) + '\n')
+```json
+{
+  "deck_name": "Biology::Cell Structure",
+  "slug": "biology_cell_structure",
+  "cards": [
+    {"type": "basic",
+     "front": "🧬 Which organelle is the <b>powerhouse of the cell</b>?",
+     "answer": "⚡ The <b>mitochondrion</b>.",
+     "context": "It generates most of the cell's ATP through aerobic respiration.",
+     "tags": ["biology::cell_structure::organelles"]},
 
-# Cloze file: three columns - text, Back Extra (may be ''), tags
-with open('/mnt/user-data/outputs/deck_cloze.tsv', 'w', encoding='utf-8', newline='') as f:
-    f.write('#separator:tab\n')
-    f.write('#html:true\n')
-    f.write('#notetype:Cloze\n')
-    f.write(f'#deck:{deck_display_name}\n')
-    f.write('#tags column:3\n')
-    for text, back_extra, tags in cloze_cards:
-        f.write('\t'.join(sanitise(c) for c in (text, back_extra, tags)) + '\n')
+    {"type": "cloze",
+     "text": "The three primary colours are:<ul><li>{{c1::red}}</li><li>{{c2::blue}}</li><li>{{c3::yellow}}</li></ul>",
+     "back_extra": "",
+     "tags": ["art::colour_theory"]},
+
+    {"type": "reversed",
+     "front": "🇪🇸 gato",
+     "back": "🐱 cat",
+     "tags": ["spanish::animals"]}
+  ]
+}
 ```
 
-After writing, run `python evals/validate.py /mnt/user-data/outputs/` to confirm the deck imports cleanly. Remember this is the *mechanical* gate only - it says nothing about whether the cards are worth learning (see the audit section in SKILL.md).
+Field notes:
+- `deck_name` is required; `slug` is optional (derived from `deck_name` if omitted).
+- **basic**: `front`, `answer` (required - the single retrievable thing), `context` (optional - explanation or quote; goes below the answer), `tags`.
+- **cloze**: `text` (must contain `{{cN::…}}`, laid out as an HTML list), `back_extra` (may be `""`), `tags`.
+- **reversed**: `front`, `back`, `tags` - generates a card each direction.
+- Put emojis and any HTML/escaping inside the field values; the script passes them through.
+
+Run it, then validate:
+
+```
+python scripts/build_deck.py deck.json /mnt/user-data/outputs/
+python scripts/check_deck.py /mnt/user-data/outputs/
+```
+
+`check_deck.py` is the *mechanical* gate only - it confirms the deck imports cleanly and says nothing about whether the cards are worth learning (see the audit section in SKILL.md).
 
 ## Emoji nuance
 
