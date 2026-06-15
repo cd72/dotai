@@ -9,6 +9,26 @@ Turn any source material into a deck of well-crafted Anki flashcards that follow
 
 <!-- Maintainers: if you change the output format (headers, columns, escaping, cloze markup, note types, files) or any card-generation behaviour, test before shipping - see evals/README.md for the decision table and how to run evals/validate.py. -->
 
+## Most common defects — fix before output
+
+These mistakes appear in almost every first draft. Read this list before generating any cards, and check against it explicitly before writing any TSV file. Treat each item as a hard gate, not a suggestion.
+
+1. **Em dash (`—`) anywhere in card content.** The em dash is banned from all card text (front, back, cloze). Replace every ` — ` with ` - ` (hyphen with spaces). The en dash (`–`) is fine in numeric ranges. Search your draft for `—` before proceeding.
+
+2. **Multi-fact backs.** If you can delete one sentence from the back and the card still makes sense, that sentence belongs on a separate card. Two sentences each asserting a different fact = two cards. This is the single most common quality failure.
+
+3. **Yes/no fronts.** "Can X do Y?" gives a 50% guess rate and tests nothing. Reframe as "What happens when X tries to do Y?" or "Which runtime supports X?" etc.
+
+4. **Numbered sequence fronts causing interference.** "What is step 1 of the N-step process?" repeated for every step produces near-identical fronts that blur together in review. Reframe each front so it is self-differentiating without the number - use what happens at that step as the cue instead. See the anti-pattern example in the interference section below.
+
+5. **Cloze lists of non-peer items.** Before writing any cloze list, ask: do these items genuinely sit at the same level, or do they relate hierarchically (X contains Y; A is a kind of B)? If they are not true peers, a flat list hides the structure that needs learning. Delete the cloze and write separate Q&A cards - including at least one card that tests the relationship explicitly.
+
+6. **Q&A card duplicating an existing cloze.** If you have a cloze card covering the membership of a list, you do not also need a Q&A card asking "what are the N items in this list?" - that is redundant coverage. Keep one or the other, not both.
+
+7. **Missing emojis.** Every front and every back must begin with an emoji. Check all cards before writing files - including cloze Back Extra fields.
+
+8. **Empty cloze Back Extra.** If there is anything brief and useful to say about the list (a mnemonic, a grouping hint, a note on ordering), put it in Back Extra. Don't leave it blank by default.
+
 ## Workflow
 
 Follow these steps in order.
@@ -17,7 +37,7 @@ Follow these steps in order.
 2. **Confirm scope briefly if the source is very long.** For sources over ~5,000 words or with clearly distinct sections, ask the user whether they want cards on the whole thing or specific chapters/topics. For shorter sources, just proceed.
 3. **Plan the cards mentally before writing them.** Identify the important concepts, definitions, processes, relationships, causes-and-effects, and key facts. Skip trivia, examples that exist only to illustrate the concept, and anything the user is unlikely to need to recall. Aim for **comprehensive coverage of important content** - one card per atomic fact - not exhaustive coverage of every sentence.
 4. **Draft the cards** following the rules in the next section.
-5. **Review every drafted card for atomicity before writing any output.** For each card ask two questions: (a) *Does the front have exactly one correct answer?* (b) *If I deleted one sentence from the back, would the card still be a complete, valid card?* If the answer to (a) is no, narrow the front. If the answer to (b) is yes, that sentence belongs on a separate card. This step is not optional - failure to split is the single most common quality problem in generated decks.
+5. **Run the pre-output audit before writing anything.** Do not write the preview or the TSV files until this pass is complete. Work through every drafted card and check each item in the "Most common defects" list above. For atomicity specifically, ask two questions per card: (a) *Does the front have exactly one correct answer?* (b) *If I deleted one sentence from the back, would the card still be a complete, valid card?* If (a) is no, narrow the front. If (b) is yes, split. This step is not optional and must not be skipped or compressed - it is the main quality gate between a draft and a deck worth importing.
 6. **Display a preview in chat** - show the cards in a readable format so the user can sanity-check before importing.
 7. **Generate the TSV files** in `/mnt/user-data/outputs/`, then present them with the `present_files` tool.
 
@@ -71,6 +91,20 @@ Each card tests **one specific piece of information**. If a concept has multiple
 - **Avoid yes/no questions.** They give a 50% chance of being right by guessing and don't test real understanding. Reframe: instead of "Is the mitochondrion the powerhouse of the cell?" ask "Which organelle is known as the powerhouse of the cell?"
 - **Add enough context that the card makes sense in isolation.** When the user reviews this card in 6 months, they won't remember it came from chapter 3 of a specific book. "What does the second argument do?" is unreviewable; "In Python's `range()` function, what does the second argument specify?" is fine.
 - **Watch for interference between near-identical cards.** Interference - similar cards making each other hard to recall - is one of the biggest causes of forgetting. When several cards share almost the same front (e.g. "Which layer sits above X?" repeated for every layer, or many drug-dosage numbers), they blur together. Defend against it: make each front unambiguous, add a distinguishing cue or example that pins down the specific one, and prefer a few well-differentiated cards over a dozen interchangeable ones. If two cards could be answered by swapping their answers without anyone noticing, they will interfere.
+
+  **Anti-pattern — numbered sequence fronts (very common mistake):**
+
+  Bad (all fronts are nearly identical; only the number differs):
+  - "What is step 1 of the 5-step deployment process?"
+  - "What is step 2 of the 5-step deployment process?"
+  - "What is step 3 of the 5-step deployment process?"
+
+  Good (each front is self-differentiating; the number is gone):
+  - "In the deployment process, what do you do before adding any configuration?"
+  - "In the deployment process, what should you verify in the staging environment before going live?"
+  - "In the deployment process, what does the monitoring phase involve?"
+
+  The numbered versions train the user to retrieve "step 1 = X" by rote. The reframed versions train understanding of *what each step actually is*, which is what matters. Use a cloze card (with `<ol>`) if you also want to test the order or membership of the sequence as a whole.
 - **Date- or version-stamp volatile facts.** Stable facts (anatomy, basic maths, history) need no stamp. But anything that goes out of date - statistics, prices, economic figures, "current" office-holders, software behaviour - should carry a marker so the user knows when it was true: put a year or version in the card (e.g. "As of <b>2026</b>, …" or "In <b>Python 3.12</b>, …") and add a tag like `as_of_2026`. This makes stale cards easy to find and update later, and stops the user trusting a figure that has since moved.
 
 ### Answer / back-of-card style
