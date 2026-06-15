@@ -13,12 +13,12 @@ Turn any source material into a deck of well-crafted Anki flashcards that follow
 
 Making cards that *import* is easy. Making cards that are *easy to learn* is the whole job, and it is a judgment task, not a formatting task. The defects that make a deck painful to review - a back that hides three facts, six fronts that differ only by a number, a question that gives away its own answer - are all invisible to a script. `scripts/check_deck.py` can confirm a deck will import cleanly; it cannot tell you whether a single card is worth learning. Only careful per-card reasoning does that.
 
-So the workflow below forces two things a first draft almost always skips:
+So the workflow below forces two things a first draft almost always skips, and both must be **written out in your response, not done in your head**:
 
-1. **Drafting each card in a shape that makes a multi-fact back impossible to miss** (the three-slot draft).
-2. **A visible, written audit of every card before any file is written** - the judgment pass, separate from the mechanical one.
+1. **A committed three-slot draft of every card** - because a multi-fact back is structurally impossible to produce *if you have first committed to a single-phrase ANSWER*. The forcing function only works when the ANSWER is actually written down before the back is assembled; collapsed into output in one mental pass, it does nothing.
+2. **A visible per-card audit** before any file is written - the judgment pass, separate from the mechanical one.
 
-Do not collapse or skip these. They are the difference between a draft and a deck worth importing. If you ever find yourself about to write TSV files without having emitted the three-slot drafts and the audit table, stop and do them first.
+Do not collapse or skip these. They are the difference between a draft and a deck worth importing. The single most common way this skill fails is doing the three-slot draft mentally and going straight to output: the ANSWER discipline never binds and multi-fact backs slip through. If you are about to write a deck JSON or TSV without having emitted the drafts and the audit table in your response, stop and emit them first.
 
 ## Workflow
 
@@ -26,13 +26,13 @@ Do not collapse or skip these. They are the difference between a draft and a dec
 2. **Confirm scope if the source is long.** For sources over ~5,000 words or with clearly distinct sections, ask whether the user wants the whole thing or specific parts. For shorter sources, just proceed.
 3. **Plan coverage.** Identify the concepts, definitions, processes, relationships, and key facts worth recalling. Aim for comprehensive coverage of *important* content - one card per atomic fact - not every sentence. Skip genuine trivia, but do not over-prune load-bearing basics.
 4. **Choose the card type for each fact** - basic Q&A by default; cloze or reversed only when they genuinely fit (see "Choosing the card type").
-5. **Draft every card in three slots** (see next section). This is where atomicity is enforced.
-6. **Run the audit** (see "The audit"). Emit the per-card table. Fix every failure, then re-check.
-7. **Preview in chat**, then **assemble the cards into a deck JSON and run the build script** - `python scripts/build_deck.py deck.json` writes the TSV files to `/mnt/user-data/outputs/`. Run `python scripts/check_deck.py /mnt/user-data/outputs/` to confirm they import cleanly, then present the files with `present_files`.
+5. **Draft and commit every card** (see "Draft every card in three slots"). Write the drafts out in your response - as the deck JSON when you have code execution (its `front`/`answer`/`context` fields *are* the three slots), or as a visible `FRONT`/`ANSWER`/`CONTEXT` list otherwise. **Hard checkpoint: do not continue past this step until the drafts are written out.** If the ANSWER of any card cannot be expressed as a single short phrase, split that card here, before the audit.
+6. **Audit the committed drafts** (see "The audit"). Emit the per-card table covering every judgment gate. **Hard checkpoint: no TSV is written until this table has been emitted and every failure fixed.**
+7. **Build and check.** Run `python scripts/build_deck.py deck.json /mnt/user-data/outputs/` (it prints a warning for any answer that still looks multi-fact - treat each as a split signal and fix the JSON), then `python scripts/check_deck.py /mnt/user-data/outputs/`. Preview in chat and present the files with `present_files`.
 
 ## Draft every card in three slots
 
-Before writing any prose back or any TSV, draft each card as three explicit slots:
+Draft each card as three explicit slots, and **write them out** - this is a committed artifact in your response, not an internal scratchpad. When you have code execution, the deck JSON *is* this draft: its `front`, `answer`, and `context` fields are the three slots, so write the JSON here at the draft step rather than reconstructing it later. Without code execution, write a visible list in this shape:
 
 ```
 FRONT:   <the question - one unambiguous answer>
@@ -40,9 +40,9 @@ ANSWER:  <the single thing to retrieve - ideally a word or short phrase>
 CONTEXT: <optional: one or two sentences of explanation or a source quote, or "none">
 ```
 
-**The ANSWER slot is the forcing function.** If the retrievable answer will not fit in a single short phrase, the card is testing more than one thing - split it now, before it becomes a dense back. Everything that is *explanation* rather than *the thing recalled* belongs in CONTEXT, which is read only after the answer is recalled.
+**The ANSWER slot is the forcing function, and it only works if you commit to it first.** Fill in ANSWER as a single short phrase *before* you think about the back. If the answer will not fit in a short phrase, the card is testing more than one thing - split it now. Everything that is *explanation* rather than *the thing recalled* belongs in CONTEXT, which is read only after the answer is recalled. (`build_deck.py` will warn you if an answer still looks multi-fact, but the discipline is yours - the warning is a backstop, not the gate.)
 
-The back is then assembled mechanically: ANSWER on its own line first, then `<br><br>` then CONTEXT. This gives you answer-first formatting for free and makes a wall-of-text back structurally impossible.
+The back is then assembled mechanically by the build script: ANSWER on its own line first, then `<br><br>` then CONTEXT. This gives you answer-first formatting for free and makes a wall-of-text back structurally impossible.
 
 Example:
 
@@ -113,12 +113,12 @@ There are two kinds of check, and they are not interchangeable.
 
 **Judgment checks - reason about every card yourself.** Atomicity, one-answer fronts, answer-telegraphing, interference, and cloze-vs-Q&A choice cannot be checked by any script. A green `check_deck.py` says only that the deck will *import* - it will happily pass a deck where every back hides three facts and every front interferes. **Never treat a passing script as evidence the cards are good.** (This is a real and easy trap: a character-level check for `—` and emoji can rubber-stamp a deck riddled with multi-fact backs.)
 
-Before writing any file, emit a **per-card audit table** - one row per card - and reason through each judgment gate explicitly. Quote the offending text on any fail, fix it, and re-emit affected rows:
+Before writing any file, emit a **per-card audit table** - one row per card - and reason through each judgment gate explicitly. Quote the offending text on any fail, fix it, and re-emit affected rows. This table is a **hard precondition**: the build script is not run until it has been emitted and every failure is fixed. It also catches the two gates the three-slot draft does *not* - telegraphed fronts and missing volatile stamps - so do not skip those columns.
 
-| # | Front (short) | One fact only? | One answer, not yes/no, not telegraphed? | No interference with siblings? | Right type (Q&A vs cloze)? |
-|---|---------------|----------------|------------------------------------------|-------------------------------|----------------------------|
+| # | Front (short) | One fact only? | One answer, not yes/no, not telegraphed? | No interference with siblings? | Right type (Q&A vs cloze)? | Volatile fact stamped (or n/a)? |
+|---|---------------|----------------|------------------------------------------|-------------------------------|----------------------------|---------------------------------|
 
-Emitting this table is mandatory and is the main quality gate. If you are tempted to write "all pass" without quoting specifics, that is the signal you are rubber-stamping - go back and read each card.
+Emitting this table is mandatory and is the main quality gate. If you are tempted to write "all pass" without quoting specifics, that is the signal you are rubber-stamping - go back and read each card. Pay particular attention to the telegraphing column (does the front contain its own answer?) and the volatile-stamp column (cost, pricing, current office-holders, version-specific behaviour need an `as_of_YEAR` marker), since these slip through most often.
 
 ## Choosing the card type
 

@@ -93,6 +93,29 @@ def assemble_back(card: dict) -> str:
     return answer + (f"<br><br>{context}" if context else "")
 
 
+# Word count above which an answer is "probably more than one fact". A crisp
+# retrievable answer is usually a word or short phrase; long answers are the
+# signature of a multi-fact back that should have been split at draft time.
+ANSWER_WORD_LIMIT = 14
+
+
+def answer_warnings(card: dict) -> list:
+    """Soft, heuristic flags for a basic card's answer field. These are NOT
+    quality judgements - the script cannot decide atomicity - they just surface
+    answers worth a second look so the model splits them before shipping."""
+    ans = card.get("answer") or ""
+    front = card.get("front", "?")
+    inner = re.sub(r"<[^>]+>", "", ans).strip()        # drop HTML tags for analysis
+    inner_no_final = re.sub(r"[.!?]+$", "", inner)      # ignore a single trailing period
+    warns = []
+    n_words = len(inner.split())
+    if n_words > ANSWER_WORD_LIMIT:
+        warns.append(f"answer is {n_words} words (> {ANSWER_WORD_LIMIT}) - is it really one fact? consider splitting: {front!r}")
+    if re.search(r"[.;!?]\s+[A-Za-z]", inner_no_final):
+        warns.append(f"answer contains a mid-string sentence break - may be two facts: {front!r}")
+    return warns
+
+
 def rows_for(card_type: str, cards: list) -> list:
     rows = []
     for c in cards:
@@ -159,6 +182,17 @@ def main():
     print(f"Deck: {deck_name}")
     for path, n in written:
         print(f"  wrote {n} cards -> {path}")
+
+    # Soft backstop: surface basic answers that look like they smuggle in a
+    # second fact. Does not fail the build - splitting is the model's call.
+    review = []
+    for c in by_type["basic"]:
+        review.extend(answer_warnings(c))
+    if review:
+        print("\nREVIEW - these answers look multi-fact (split unless you're sure they're one fact):")
+        for w in review:
+            print("  -", w)
+
     print("\nNext: run  python scripts/check_deck.py " + output_dir)
 
 

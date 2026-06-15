@@ -64,6 +64,7 @@ Field notes:
 - **cloze**: `text` (must contain `{{cN::…}}`, laid out as an HTML list), `back_extra` (may be `""`), `tags`.
 - **reversed**: `front`, `back`, `tags` - generates a card each direction.
 - Put emojis and any HTML/escaping inside the field values; the script passes them through.
+- `build_deck.py` prints a REVIEW warning if a basic `answer` looks multi-fact (over ~14 words, or containing a mid-string sentence break). It does not fail the build - treat each warning as a prompt to split the card.
 
 Run it, then validate:
 
