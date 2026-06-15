@@ -5,5 +5,20 @@ to zip the anki flashcard creator skill for importing into Claude
 ```zip -r anki-flashcard-creator.skill anki-flashcard-creator -x 'anki-flashcard-creator/evals/*'```
 
 
+Example prompt
 
+```
+/anki-flashcard-creator
+ 
+could you generate me flashcards from this page.
+https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-agents
+```
+
+
+then afterwards, run a check
+```
+could you audit each generated card against the rules in the anki-flashcard-creator skill?
+
+pay close attention to how good / useful the cards are for memorization especially according to the best practices 
+```
 .
