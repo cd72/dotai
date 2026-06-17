@@ -8,8 +8,15 @@ the cards are written to disk in the correct format every time - correct
 headers, answer-first backs, safe TSV escaping - so none of that has to be
 re-derived by hand on each run.
 
-It does NOT judge card quality (atomicity, cloze-vs-Q&A, interference). That is
-the model's job and cannot be scripted. Keep this a dumb serialiser.
+It does NOT judge semantic card quality (atomicity, interference, whether a
+fact is worth learning). That is the model's job and cannot be scripted.
+
+It DOES hard-fail on one narrow, mechanical defect: a basic answer that
+*literally encodes a list* - an HTML list (<ol>/<ul>/<li>) or a multi-item
+dash-join. These have near-zero false positives and are never a legitimate
+basic card (a list belongs in a cloze or in separate cards), so the build is
+blocked rather than warned. Fuzzier enumeration signals (commas, conjunctions,
+length) stay as soft REVIEW warnings, because prose answers contain commas too.
 
 Usage:
     python scripts/build_deck.py <deck.json> [output_dir]
@@ -99,10 +106,43 @@ def assemble_back(card: dict) -> str:
 ANSWER_WORD_LIMIT = 14
 
 
+def list_answer_errors(card: dict) -> list:
+    """HARD errors: the card *literally encodes a list*. Unlike the soft
+    heuristics below, these have near-zero false positives - a basic answer or
+    front never legitimately contains an HTML list or a 3+ item dash-join,
+    because that content belongs in a cloze (one {{cN::item}} per <li>) or in
+    separate cards. When this fires the build is BLOCKED: a list smuggled into a
+    single Q&A back is the deck's most common and most memory-damaging defect
+    (SuperMemo's minimum-information principle), and it is exactly the case a
+    one-line 'recalled as a unit' rationalisation slips past a human audit.
+    Returns a list of error strings (empty if clean)."""
+    front = card.get("front", "?")
+    errs = []
+    for field in ("front", "answer"):
+        val = card.get(field) or ""
+        if re.search(r"<\s*(?:ol|ul|li)\b", val, re.I):
+            errs.append(
+                f"basic card {field} contains an HTML list (<ol>/<ul>/<li>) - a list is "
+                f"never a basic card. Make it a cloze (one {{{{cN::item}}}} per <li>) or "
+                f"split into one card per item. Front: {front!r}")
+    ans_plain = re.sub(r"<[^>]+>", " ", card.get("answer") or "")
+    ans_plain = re.sub(r"[.!?]+$", "", ans_plain).strip()
+    dash_parts = [p.strip() for p in re.split(r"\s+-\s+", ans_plain) if p.strip()]
+    if len(dash_parts) >= 3:
+        errs.append(
+            f"answer enumerates {len(dash_parts)} dash-separated items "
+            f"({' / '.join(dash_parts)}) - a 3+ item list is never a basic card. Convert "
+            f"to a cloze with <ol>/<ul>, or split into one card per distinguishing "
+            f"feature. Front: {front!r}")
+    return errs
+
+
 def answer_warnings(card: dict) -> list:
     """Soft, heuristic flags for a basic card's answer field. These are NOT
     quality judgements - the script cannot decide atomicity - they just surface
-    answers worth a second look so the model splits them before shipping."""
+    answers worth a second look so the model splits them before shipping. Unlike
+    list_answer_errors() these do NOT block the build, because commas and
+    conjunctions occur in legitimate single-fact prose answers too."""
     ans = card.get("answer") or ""
     front = card.get("front", "?")
     inner = re.sub(r"<[^>]+>", "", ans).strip()        # drop HTML tags for analysis
@@ -113,6 +153,13 @@ def answer_warnings(card: dict) -> list:
         warns.append(f"answer is {n_words} words (> {ANSWER_WORD_LIMIT}) - is it really one fact? consider splitting: {front!r}")
     if re.search(r"[.;!?]\s+[A-Za-z]", inner_no_final):
         warns.append(f"answer contains a mid-string sentence break - may be two facts: {front!r}")
+    # Enumeration heuristic: 3+ comma/semicolon items that are ALL short looks
+    # like a peer list ("Plan, Use tools, Reflect"); a single long clause among
+    # them is usually prose (adjective pairs, appositives) so we don't warn.
+    norm = re.sub(r",\s+(?:and|or)\s+", ", ", inner_no_final)   # "A, B and C" -> "A, B, C"
+    comma_items = [p.strip() for p in re.split(r"[;,]", norm) if p.strip()]
+    if len(comma_items) >= 3 and all(len(it.split()) <= 5 for it in comma_items):
+        warns.append(f"answer may enumerate {len(comma_items)} peer items - if so, split or make a cloze: {front!r}")
     return warns
 
 
@@ -165,6 +212,21 @@ def main():
         if t not in by_type:
             raise ValueError(f"unknown card type {t!r} (expected basic/cloze/reversed)")
         by_type[t].append(c)
+
+    # HARD GATE - validate before writing anything, so a deck that encodes a list
+    # in a basic answer never lands in the output directory. Only basic cards are
+    # checked: a cloze legitimately contains <ol>/<ul>/<li>, that is the point.
+    hard_errors = []
+    for c in by_type["basic"]:
+        hard_errors.extend(list_answer_errors(c))
+    if hard_errors:
+        print("BUILD BLOCKED - basic cards that encode a list (must be a cloze or split):")
+        for e in hard_errors:
+            print("  \u2717", e)
+        print("\nNo files written. A 3+ item list is never one basic card - there is no")
+        print("'recalled as a unit' exception. Convert each to a cloze (<ol>/<ul>) or")
+        print("split into one card per distinguishing feature, then re-run.")
+        sys.exit(1)
 
     written = []
     for card_type, group in by_type.items():

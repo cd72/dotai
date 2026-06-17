@@ -68,6 +68,8 @@ Front patterns that almost always smuggle in multiple facts - treat them as a si
 
 Back patterns to catch before finalising: two full sentences asserting different facts; "and" joining two independent clauses; a run of 3+ comma-separated independent items. A list whose items are **not true peers** (one contains another, or they relate hierarchically) must not be enumerated in one card - write separate cards plus one that tests the relationship explicitly.
 
+**A 3+ item enumeration is never a basic answer - there is no "recalled as a unit" exception.** If the ANSWER slot is a list, a sequence, or a set of named steps (whether comma-joined, "and"-joined, or written as `A - B - C`), the card is testing membership/order, not one fact. Recalling five lifecycle steps from a single prompt trains nothing reliably (SuperMemo's minimum-information principle). Resolve it one of two ways, never by asserting the list is "one unit": **convert to a cloze** with an `<ol>`/`<ul>` (when membership or order is the thing to learn - see references/cloze.md), or **split into one card per distinguishing feature** (when each item carries content - "which step happens in the Snowsight playground?" not "what is step 3?"). `build_deck.py` now **hard-fails the build** when a basic answer literally encodes a list (an HTML list, or a 3+ item dash-join), so this cannot ship by accident; the comma/conjunction cases it can only warn on, so they are yours to catch in the audit.
+
 **Bad (too much at once):** Front: What is photosynthesis? · Back: The process by which plants convert light energy into chemical energy, using carbon dioxide and water to produce glucose and oxygen, in the chloroplasts.
 
 **Good (atomic):** "What is the purpose of photosynthesis?" → convert light energy to chemical energy. "What two raw materials does it need?" → carbon dioxide and water. "What two products does it yield?" → glucose and oxygen. "Where does it occur?" → the chloroplasts.
@@ -119,6 +121,8 @@ Before writing any file, emit a **per-card audit table** - one row per card - an
 |---|---------------|----------------|------------------------------------------|-------------------------------|----------------------------|---------------------------------|
 
 Emitting this table is mandatory and is the main quality gate. If you are tempted to write "all pass" without quoting specifics, that is the signal you are rubber-stamping - go back and read each card. Pay particular attention to the telegraphing column (does the front contain its own answer?) and the volatile-stamp column (cost, pricing, current office-holders, version-specific behaviour need an `as_of_YEAR` marker), since these slip through most often.
+
+**The type column has one banned answer: "recalled as a unit" (or "one unit", "as a set", "one sequence").** This is the exact phrase a multi-item back uses to slip past the audit. If a card's answer is a list or sequence, the type column must name the *disposition* - "cloze, order matters" or "split into N cards" - not assert the list is one fact. A passing `build_deck.py` does not cover you here either: it hard-fails only on *literally encoded* lists (HTML lists, dash-joins), so a comma- or "and"-joined enumeration ("Plan, Use tools, Reflect and respond") will build cleanly and is yours to catch in this column.
 
 ## Choosing the card type
 
