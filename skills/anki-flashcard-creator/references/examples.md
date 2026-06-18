@@ -26,27 +26,27 @@ Back: 🔬 In the <b>mitochondrial matrix</b>.<br><br><i>"The Krebs cycle… tak
 Tags: biology::metabolism::krebs_cycle
 
 Card 2
-Front: ⚙️ What are the two alternative names for the <b>Krebs cycle</b>?
+Front: 🧬 What are the two alternative names for the <b>Krebs cycle</b>?
 Back: 📚 The <b>citric acid cycle</b> and the <b>tricarboxylic acid (TCA) cycle</b>.
 Tags: biology::metabolism::krebs_cycle
 
 Card 3
-Front: ⚡ How many <b>NADH</b> molecules does one turn of the Krebs cycle produce?
+Front: 🧬 How many <b>NADH</b> molecules does one turn of the Krebs cycle produce?
 Back: 🔢 <b>3 NADH</b> per acetyl-CoA molecule entering the cycle.
 Tags: biology::metabolism::krebs_cycle energy
 
 Card 4
-Front: 🔥 How many <b>FADH₂</b> molecules does one turn of the Krebs cycle produce?
+Front: 🧬 How many <b>FADH₂</b> molecules does one turn of the Krebs cycle produce?
 Back: 🔢 <b>1 FADH₂</b> per acetyl-CoA.
 Tags: biology::metabolism::krebs_cycle energy
 
 Card 5
-Front: 💨 How many <b>CO₂</b> molecules are released per turn of the Krebs cycle?
+Front: 🧬 How many <b>CO₂</b> molecules are released per turn of the Krebs cycle?
 Back: 🌫️ <b>2 CO₂</b> molecules per acetyl-CoA.
 Tags: biology::metabolism::krebs_cycle
 
 Card 6 (cloze - list of products is a good cloze fit; items stacked as a list, not inline)
-Text: 🧪 Per acetyl-CoA, the Krebs cycle produces:<ul><li>{{c1::3}} NADH</li><li>{{c2::1}} FADH₂</li><li>{{c3::1}} GTP</li><li>{{c4::2}} CO₂</li></ul>
+Text: 🧬 Per acetyl-CoA, the Krebs cycle produces:<ul><li>{{c1::3}} NADH</li><li>{{c2::1}} FADH₂</li><li>{{c3::1}} GTP</li><li>{{c4::2}} CO₂</li></ul>
 Back Extra: 🔬 Yields per single turn of the cycle.<br><i>"…it produces 3 NADH, 1 FADH2, 1 GTP… and 2 CO2."</i>
 Tags: biology::metabolism::krebs_cycle
 ```
@@ -70,7 +70,7 @@ Back: 📦 An <b>enumerate object</b> - an iterator that yields <code>(index, va
 Tags: python::builtins::iteration
 
 Card 2
-Front: 🔢 What is the default <b>start</b> value for Python's <code>enumerate()</code>?
+Front: 🐍 What is the default <b>start</b> value for Python's <code>enumerate()</code>?
 Back: 0️⃣ <b>0</b> - pass <code>start=N</code> to begin counting from <i>N</i> instead.
 Tags: python::builtins::iteration
 
@@ -80,7 +80,7 @@ Back: ⌨️ <code>enumerate(iterable, start=0)</code>
 Tags: python::builtins::iteration syntax
 
 Card 4
-Front: 🔁 Given <code>enumerate(['a','b','c'], start=1)</code>, what tuples does it yield?
+Front: 🐍 Given <code>enumerate(['a','b','c'], start=1)</code>, what tuples does it yield?
 Back: 📦 <code>(1, 'a')</code>, <code>(2, 'b')</code>, <code>(3, 'c')</code>.
 Tags: python::builtins::iteration examples
 ```

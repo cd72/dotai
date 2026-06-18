@@ -7,9 +7,8 @@ It does NOT judge card quality (atomicity, cloze-vs-Q&A choice, interference,
 answer-telegraphing) - that needs per-card reasoning by the model or a human.
 A green result here means "the file is well-formed", NOT "the cards are good".
 
-This lives in scripts/ (not evals/) on purpose: the packager ships scripts/ but
-excludes evals/, so putting it here makes it runnable at runtime by an installed
-skill, not just by a maintainer testing offline.
+This lives in scripts/ (which the packager ships) so it is runnable at output
+time by an installed skill, not just by a maintainer testing offline.
 
 Usage:
     python scripts/check_deck.py <file-or-directory> [more files...]

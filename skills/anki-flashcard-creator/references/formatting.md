@@ -77,7 +77,15 @@ python scripts/check_deck.py /mnt/user-data/outputs/
 
 ## Emoji nuance
 
-Start each side with an emoji, varied across the deck, loosely tied to the topic (🧬 biology, ⚖️ law, 🏛️ history, 💡 definitions, ⚙️ processes, 📐 maths, 🔁 cycles). Keep it *loosely* topical, never a giveaway - an emoji that uniquely identifies the answer becomes an incidental retrieval cue, so the learner recognises the picture instead of recalling the fact. If the user prefers plain cards, drop emojis entirely.
+Emojis are split by side, because only the front can leak the answer (you see it *before* you recall; the back you see *after*).
+
+**Front: one shared category marker per topic.** Pick a single emoji for the subject and put it on *every* front in that topic (🧬 biology, ⚖️ law, 🏛️ history, ⚙️ processes, 📐 maths, 🌐 networking, 🐍 Python). Because dozens of cards share it, the emoji says "this is biology" without distinguishing one biology answer from another - so it can never become an answer cue. Different topics get different markers, but within a topic the marker is constant. The failure mode to avoid is a *bespoke, content-specific* front emoji (💨 on a CO₂ card, 🫁 on a "which organ?" card): repeated over many reviews, the learner answers from the picture instead of reading the question. This is checked in the audit's telegraphing column.
+
+**Back: free and decorative.** The back is revealed only after recall, so its emoji can't telegraph anything. Vary it freely for visual rhythm and scannability, or echo the answer - it makes no pedagogical difference.
+
+**Reversed cards** show *both* sides as a prompt, so treat both as fronts: use category markers on each. Language flags are the ideal case (🇪🇸 on the Spanish side, 🇬🇧 on the English side) - they signal which language to produce without giving away the word.
+
+If the user prefers plain cards, drop emojis entirely.
 
 ## Re-importing and duplicates
 
