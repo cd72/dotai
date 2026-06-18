@@ -18,12 +18,23 @@ https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-agents
 ```
 
 
+```
+/anki-flashcard-creator
+
+I'm an a-level student and my goal is to achieve great marks in my exams.
+
+could you generate me flashcards from this attached past paper mark scheme
+
+```
+
 then afterwards, run a check
 ```
 could you audit each generated card against the rules in the anki-flashcard-creator skill?
 
 pay close attention to how good / useful the cards are for memorization especially according to the best practices 
 ```
+
+
 
 
 

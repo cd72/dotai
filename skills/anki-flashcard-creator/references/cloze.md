@@ -13,10 +13,11 @@ SuperMemo's guidance is that *enumerations and unordered sets are intrinsically 
 
 Reserve the bare cloze list for cases where membership or order genuinely is the thing being memorised.
 
-**Two anti-patterns to refuse outright:**
+**Three anti-patterns to refuse outright:**
 
 - **Cloze lists of non-peer items.** Before writing any cloze list, ask: do these items sit at the same level, or do they relate hierarchically (X contains Y; A is a kind of B)? If they are not true peers, a flat list hides the structure that needs learning. Write separate Q&A cards instead, including at least one that tests the relationship explicitly.
 - **A Q&A card duplicating an existing cloze.** If a cloze already covers a list's membership, you do not also need a Q&A asking "what are the N items?" Keep one, not both.
+- **Cloze over an *open* list (the false-closed-set trap).** A cloze tells the learner "these are *the* members." That is a lie when the real set is open - "name two input devices," "give an example of secondary storage" - where many answers are valid and you simply listed a couple. Drilling `{{c1::Monitor}}, {{c2::Speakers}}` quietly teaches that those two *are* the answer, which is wrong and brittle in an exam. Reserve cloze for sets that are genuinely closed and canonical (the primary colours, the stages of mitosis). For open "any N of many" cases, write distinguishing-feature Q&A cards, or a single free-recall card whose back lists the acceptable answers.
 
 ## Markup: lay items out as an HTML list
 
