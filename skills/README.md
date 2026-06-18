@@ -31,7 +31,9 @@ then afterwards, run a check
 ```
 could you audit each generated card against the rules in the anki-flashcard-creator skill?
 
-pay close attention to how good / useful the cards are for memorization especially according to the best practices 
+pay close attention to how good / useful the cards are for memorization especially according to the best practices.
+
+Fix / split any that need it.
 ```
 
 
