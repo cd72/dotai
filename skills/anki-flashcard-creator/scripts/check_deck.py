@@ -25,6 +25,11 @@ Checks per file:
   - no raw & that isn't a proper HTML entity
   - cloze files: every note has >=1 {{cN::...}}; warns on inline comma-separated
     cloze runs (should be an HTML list instead)
+  - basic/reversed files: WARNS (never fails) when a front looks like a yes/no
+    question or a binary "A or B?" choice - both are 50%-guess fronts. This is a
+    conservative safety net for the per-card audit, not a replacement: the defects
+    that actually need reading the card (telegraphing, interference, smuggled
+    context) cannot be detected here.
 """
 import os
 import re
@@ -35,6 +40,30 @@ TAG_RE = re.compile(r"</?([a-zA-Z]+)(\s[^>]*)?>")
 ENTITY_RE = re.compile(r"&(?:[a-zA-Z]+|#\d+|#x[0-9a-fA-F]+);")
 CLOZE_RE = re.compile(r"\{\{c\d+::")
 INLINE_CLOZE_RUN_RE = re.compile(r"\{\{c\d+::[^}]*\}\}\s*,\s*\{\{c\d+::")
+
+# --- Heuristic front-quality warnings (judgment gates that happen to be lexically detectable) ---
+# These are conservative and WARN ONLY - they never fail the build. They are a safety net for
+# when the per-card audit misses them; they do not replace it. Most quality defects
+# (telegraphing, interference, smuggled context) need reading the card and cannot be scripted.
+
+# Yes/no front: starts with an interrogative auxiliary and ends in a question mark.
+# A 50% guess rate tests nothing -> recast as an open "which/what/why" front.
+YES_NO_FRONT_RE = re.compile(
+    r"^(is|are|was|were|do|does|did|can|could|should|would|will|has|have|had)\b.*\?\s*$",
+    re.IGNORECASE,
+)
+# Binary "A or B?" front: a two-option forced choice baked into the question (".. X or Y?").
+# Same 50% guess, and it lets the learner memorise the position instead of the fact.
+# Requires the " or " to sit near the end (before the final '?') to avoid matching answers
+# that merely list alternatives mid-sentence.
+A_OR_B_FRONT_RE = re.compile(r"\bor\b[^?]{0,40}\?\s*$", re.IGNORECASE)
+
+
+def strip_for_prose(text):
+    """Remove HTML tags and a leading emoji/symbol so front heuristics see plain words."""
+    prose = TAG_RE.sub("", text)
+    # drop leading non-letter clutter (category emoji, spaces) so ^ anchors hit the first word
+    return re.sub(r"^[^A-Za-z]+", "", prose).strip()
 
 
 def check_file(path):
@@ -77,6 +106,19 @@ def check_file(path):
                 problems.append(f"card {i}: cloze note has no {{{{cN::...}}}} deletion")
             if INLINE_CLOZE_RUN_RE.search(text):
                 warnings.append(f"card {i}: inline comma-separated clozes - prefer an HTML list (<ul>/<ol>)")
+        else:
+            # Front-quality heuristics: the front is the first column on basic/reversed notes.
+            front_prose = strip_for_prose(cols[0]) if cols else ""
+            if YES_NO_FRONT_RE.match(front_prose):
+                warnings.append(
+                    f"card {i}: front looks like a yes/no question (50% guess) - "
+                    f"recast as an open 'which/what/why' front"
+                )
+            elif A_OR_B_FRONT_RE.search(front_prose):
+                warnings.append(
+                    f"card {i}: front looks like a binary 'A or B?' choice (50% guess) - "
+                    f"recast as an open front or test the property directly"
+                )
 
     return problems, warnings, len(cards)
 
@@ -117,7 +159,9 @@ def main():
             print("  structural checks passed")
 
     print("\n" + ("Some files have problems." if any_problem else "All files passed structural checks."))
-    print("Reminder: this is the mechanical gate only - it says nothing about whether the cards are worth learning.")
+    print("Reminder: structural pass != good cards. Any 'warn:' lines above are heuristic")
+    print("flags to revisit; absence of warnings still does not mean the cards are well-made -")
+    print("telegraphing, interference, and smuggled-context defects are invisible to this script.")
     sys.exit(1 if any_problem else 0)
 
 
