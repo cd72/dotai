@@ -15,8 +15,11 @@ It DOES hard-fail on one narrow, mechanical defect: a basic answer that
 *literally encodes a list* - an HTML list (<ol>/<ul>/<li>) or a multi-item
 dash-join. These have near-zero false positives and are never a legitimate
 basic card (a list belongs in a cloze or in separate cards), so the build is
-blocked rather than warned. Fuzzier enumeration signals (commas, conjunctions,
-length) stay as soft REVIEW warnings, because prose answers contain commas too.
+blocked rather than warned. (The sole exception is a card tagged
+"enumeration" - the skill's deliberate free-recall exception to atomicity -
+which may carry a bulleted <ul>/<ol> list in its answer.) Fuzzier enumeration
+signals (commas, conjunctions, length) stay as soft REVIEW warnings, because
+prose answers contain commas too.
 
 Usage:
     python scripts/build_deck.py <deck.json> [output_dir]
@@ -118,22 +121,33 @@ def list_answer_errors(card: dict) -> list:
     Returns a list of error strings (empty if clean)."""
     front = card.get("front", "?")
     errs = []
-    for field in ("front", "answer"):
+    # Free-recall ENUMERATION cards (tagged "enumeration") are the skill's one
+    # deliberate, named exception to atomicity: their whole job is rehearsing the
+    # cold generation of a *set* of points (an exam "give three reasons" item), so
+    # a bulleted list of acceptable answers legitimately belongs on the back. For
+    # these, an HTML list is allowed in the ANSWER (and the multi-item answer is
+    # expected, so the dash-join check is skipped too). The FRONT must still never
+    # be a list, and for every other basic card the guard stays fully in force.
+    is_enumeration = "enumeration" in (card.get("tags") or [])
+    list_fields = ("front",) if is_enumeration else ("front", "answer")
+    for field in list_fields:
         val = card.get(field) or ""
         if re.search(r"<\s*(?:ol|ul|li)\b", val, re.I):
+            where = "front" if is_enumeration else field
             errs.append(
-                f"basic card {field} contains an HTML list (<ol>/<ul>/<li>) - a list is "
+                f"basic card {where} contains an HTML list (<ol>/<ul>/<li>) - a list is "
                 f"never a basic card. Make it a cloze (one {{{{cN::item}}}} per <li>) or "
                 f"split into one card per item. Front: {front!r}")
-    ans_plain = re.sub(r"<[^>]+>", " ", card.get("answer") or "")
-    ans_plain = re.sub(r"[.!?]+$", "", ans_plain).strip()
-    dash_parts = [p.strip() for p in re.split(r"\s+-\s+", ans_plain) if p.strip()]
-    if len(dash_parts) >= 3:
-        errs.append(
-            f"answer enumerates {len(dash_parts)} dash-separated items "
-            f"({' / '.join(dash_parts)}) - a 3+ item list is never a basic card. Convert "
-            f"to a cloze with <ol>/<ul>, or split into one card per distinguishing "
-            f"feature. Front: {front!r}")
+    if not is_enumeration:
+        ans_plain = re.sub(r"<[^>]+>", " ", card.get("answer") or "")
+        ans_plain = re.sub(r"[.!?]+$", "", ans_plain).strip()
+        dash_parts = [p.strip() for p in re.split(r"\s+-\s+", ans_plain) if p.strip()]
+        if len(dash_parts) >= 3:
+            errs.append(
+                f"answer enumerates {len(dash_parts)} dash-separated items "
+                f"({' / '.join(dash_parts)}) - a 3+ item list is never a basic card. Convert "
+                f"to a cloze with <ol>/<ul>, or split into one card per distinguishing "
+                f"feature. Front: {front!r}")
     return errs
 
 
